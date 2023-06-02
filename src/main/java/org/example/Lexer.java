@@ -77,17 +77,21 @@ public class Lexer {
 
                     System.out.println("Identifier: " + identifier);
 
-                    // FIX: This is a placeholder!!
-                    return new SimpleToken(Identifier);
-                    // look in hashmap
-
-                    // if not a keyword, it is an identifier
+                    // TODO: Make this better
+                    switch (identifier.toString().toLowerCase().trim()) {
+                        case "let" -> t = new SimpleToken(Let);
+                        case "if" -> t = new SimpleToken(If);
+                        case "for" -> t = new SimpleToken(For);
+                        case "while" -> t = new SimpleToken(While);
+                        // It may be a variable
+                        default -> t = new ValueToken(Identifier, identifier.toString());
+                    }
                 }
             }
         }
 
         if (t == null) {
-            throw new RuntimeException("Invalid token '" + this.ch + "'");
+            throw new RuntimeException("Invalid token: '" + this.ch + "'");
         }
 
         this.readChar();

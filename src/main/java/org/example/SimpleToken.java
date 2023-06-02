@@ -4,7 +4,7 @@ import org.example.TokenUtils.Token;
 import org.example.TokenUtils.TokenType;
 
 public class SimpleToken implements Token {
-    public TokenType t;
+    private TokenType t;
 
     SimpleToken(TokenType t) {
         this.t = t;
