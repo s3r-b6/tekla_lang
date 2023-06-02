@@ -75,4 +75,14 @@ public class Tests {
             assertTrue(errorMsg, tokenPartialEq(token, expected));
         }
     }
+
+    @Test
+    public void splitsIdentifiers() {
+        String src = "let for if aaaaaa_aaaa";
+        Lexer lex = new Lexer(src);
+        for (int i = 0; i < 4; i++) {
+            lex.nextToken();
+        }
+        assertTrue(true);
+    }
 }

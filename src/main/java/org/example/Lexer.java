@@ -43,6 +43,7 @@ public class Lexer {
 
                 return nextToken();
             }
+
             // I kind of don't like this solution.
             // Advances the pointer and recursively returns the next valid Token.
             case ' ' -> {
@@ -61,18 +62,32 @@ public class Lexer {
                 this.readChar();
                 return nextToken();
             }
+
             case 0 -> t = new SimpleToken(EOF);
+
             default -> {
-                if ((this.ch >= 'a' && this.ch <= 'z') || (this.ch >= 'a' && this.ch <= 'z')) {
+                if ((this.ch >= 'a' && this.ch <= 'z') || (this.ch >= 'A' && this.ch <= 'Z')) {
+                    StringBuilder identifier = new StringBuilder(this.ch);
+
+                    // While we read valid identifier-chars
+                    while ((this.ch >= 'a' && this.ch <= 'z') || (this.ch >= 'A' && this.ch <= 'Z') || this.ch == '_') {
+                        identifier.append(this.ch);
+                        this.readChar();
+                    }
+
+                    System.out.println("Identifier: " + identifier);
+
+                    // FIX: This is a placeholder!!
+                    return new SimpleToken(Identifier);
                     // look in hashmap
 
-                    // it is an identifier
+                    // if not a keyword, it is an identifier
                 }
             }
         }
 
         if (t == null) {
-            throw new RuntimeException("Invalid token " + this.ch);
+            throw new RuntimeException("Invalid token '" + this.ch + "'");
         }
 
         this.readChar();
