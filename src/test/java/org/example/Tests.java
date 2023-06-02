@@ -1,12 +1,12 @@
 package org.example;
 
-import static org.example.TokenType.*;
+import static org.example.TokenUtils.tokenPartialEq;
+import static org.example.TokenUtils.TokenType.*;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 
-import org.example.Lexer.*;
-
+import org.example.TokenUtils.Token;
 import org.junit.Test;
 
 public class Tests {
@@ -28,7 +28,7 @@ public class Tests {
         for (Token expected : expectedTokens) {
             Token token = lex.nextToken();
             String errorMsg = "Expected: " + expected.getTokenType() + " Got: " + token.getTokenType();
-            assertTrue(errorMsg, lex.tokenPartialEq(token, expected));
+            assertTrue(errorMsg, tokenPartialEq(token, expected));
         }
     }
 
@@ -50,7 +50,7 @@ public class Tests {
         for (Token expected : expectedTokens) {
             Token token = lex.nextToken();
             String errorMsg = "Expected: " + expected.getTokenType() + " Got: " + token.getTokenType();
-            assertTrue(errorMsg, lex.tokenPartialEq(token, expected));
+            assertTrue(errorMsg, tokenPartialEq(token, expected));
         }
     }
 
@@ -72,7 +72,7 @@ public class Tests {
         for (Token expected : expectedTokens) {
             Token token = lex.nextToken();
             String errorMsg = "Expected: " + expected.getTokenType() + " Got: " + token.getTokenType();
-            assertTrue(errorMsg, lex.tokenPartialEq(token, expected));
+            assertTrue(errorMsg, tokenPartialEq(token, expected));
         }
     }
 }

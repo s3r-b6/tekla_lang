@@ -1,66 +1,21 @@
 package org.example;
 
-import static org.example.TokenType.*;
+import static org.example.TokenUtils.TokenType.*;
+import org.example.TokenUtils.Token;
 
 public class Lexer {
     private String src;
-    private int currPos;
-    private int nextPos;
+    private int startPos;
+    private int position;
     private char ch;
 
-    interface Token {
-        public TokenType getTokenType();
-    }
-
-    public boolean tokenPartialEq(Token t1, Token t2) {
-        return (t1.getTokenType() == t2.getTokenType());
-    }
-
-    public static class SimpleToken implements Token {
-        public TokenType t;
-
-        SimpleToken(TokenType t) {
-            this.t = t;
-        }
-
-        public TokenType getTokenType() {
-            return this.t;
-        }
-    }
-
-    public static class ValueToken implements Token {
-        public TokenType t;
-        String value;
-
-        ValueToken(TokenType type, String value) {
-            this.t = type;
-            this.value = value;
-        }
-
-        public TokenType getTokenType() {
-            return this.t;
-        }
-    }
-
     Lexer(String src) {
-        this.currPos = 0;
-        this.nextPos = 0;
+        this.startPos = 0;
+        this.position = 0;
         this.ch = 0;
         this.src = src;
 
         this.readChar(); // currPos = 0; nextPos =1;
-    }
-
-    // Move the pointer. 1 look-ahead
-    private void readChar() {
-        if (this.nextPos >= this.src.length()) {
-            this.ch = 0; // EOF
-        } else {
-            this.ch = this.src.charAt(this.nextPos); // Whatever char
-        }
-
-        this.currPos = this.nextPos;
-        this.nextPos += 1;
     }
 
     public Token nextToken() {
@@ -74,26 +29,23 @@ public class Lexer {
             case '=' -> t = new SimpleToken(Equal);
             case ',' -> t = new SimpleToken(Comma);
             case ';' -> t = new SimpleToken(Semicolon);
-
-            case '/' -> { // Special case
-                char c1 = this.ch;
+            // Special case. It could be a /, or it could be a //.......
+            case '/' -> {
                 this.readChar();
-                if (c1 == this.ch) {
-                    // It is a comment!
-                    while (this.ch != '\n') {
-                        this.readChar();
-                    }
-
-                    // Again ignore this symbol and return the next normal token
-                    return nextToken();
-                } else {
+                if ('/' != this.ch) {
                     return new SimpleToken(Slash);
                 }
-            }
 
+                while (this.ch != '\n') {
+                    this.readChar();
+                }
+                this.readChar(); // Also move the pointer past the \n (the switch would do it anyway)
+
+                return nextToken();
+            }
+            // I kind of don't like this solution.
+            // Advances the pointer and recursively returns the next valid Token.
             case ' ' -> {
-                // I kind of don't like this solution but it does work.
-                // Advances the pointer and recursively returns the next non-whitespace char.
                 this.readChar();
                 return nextToken();
             }
@@ -127,4 +79,15 @@ public class Lexer {
         return t;
     }
 
+    // Move the pointer a single char.
+    private void readChar() {
+        if (this.position >= this.src.length()) {
+            this.ch = 0; // EOF
+        } else {
+            this.ch = this.src.charAt(this.position); // Whatever char
+        }
+
+        this.startPos = this.position;
+        this.position += 1;
+    }
 }
