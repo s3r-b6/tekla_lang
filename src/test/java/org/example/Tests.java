@@ -4,6 +4,7 @@ import static org.example.TokenUtils.tokenPartialEq;
 import static org.example.TokenUtils.tokenEq;
 import static org.example.TokenUtils.TokenType.*;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 
@@ -108,6 +109,23 @@ public class Tests {
             String errorMsg = expectedMsg + " " + gotMsg;
             assertTrue(errorMsg, tokenEq(token, expected));
         }
-        assertTrue(true);
+    }
+
+    @Test
+    public void canCheckPartEqInIdentifiers() {
+        Lexer lex = new Lexer("aaa");
+        Token token = lex.nextToken();
+
+        ValueToken expected = new ValueToken(Identifier, "bbb");
+
+        String expectedMsg = "Expected: '" + expected.getTokenType() + "'";
+        String gotMsg = "Got: '" + token.getTokenType() + "'";
+
+        if (!(token instanceof ValueToken)) {
+            fail("'aaa' should be a ValueToken");
+        }
+
+        String errorMsg = expectedMsg + " " + gotMsg;
+        assertTrue(errorMsg, tokenPartialEq(token, expected));
     }
 }
