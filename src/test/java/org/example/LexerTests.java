@@ -3,17 +3,19 @@ package org.example;
 import static org.example.TokenUtils.tokenPartialEq;
 import static org.example.TokenUtils.tokenEq;
 import static org.example.TokenUtils.TokenType.*;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
 
 import org.example.TokenUtils.Token;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class Tests {
+public class LexerTests {
     @Test
-    public void createsCorrectSimpleTokens() {
+    public void testCorrectSimpleTokens() {
         String src = "(){}+=,;";
         Lexer lex = new Lexer(src);
 
@@ -30,12 +32,12 @@ public class Tests {
         for (Token expected : expectedTokens) {
             Token token = lex.nextToken();
             String errorMsg = "Expected: " + expected.getTokenType() + " Got: " + token.getTokenType();
-            assertTrue(errorMsg, tokenPartialEq(token, expected));
+            assertTrue(tokenPartialEq(token, expected), errorMsg);
         }
     }
 
     @Test
-    public void ignoresComments() {
+    public void testIgnoresComments() {
         String src = "//Test Comment\n  ()  {}\n+=,;";
         Lexer lex = new Lexer(src);
 
@@ -52,12 +54,12 @@ public class Tests {
         for (Token expected : expectedTokens) {
             Token token = lex.nextToken();
             String errorMsg = "Expected: " + expected.getTokenType() + " Got: " + token.getTokenType();
-            assertTrue(errorMsg, tokenPartialEq(token, expected));
+            assertTrue(tokenPartialEq(token, expected), errorMsg);
         }
     }
 
     @Test
-    public void ignoresWhiteSpace() {
+    public void testIgnoresWhiteSpace() {
         String src = "  ()  {}\n+=,;";
         Lexer lex = new Lexer(src);
 
@@ -74,12 +76,12 @@ public class Tests {
         for (Token expected : expectedTokens) {
             Token token = lex.nextToken();
             String errorMsg = "Expected: " + expected.getTokenType() + " Got: " + token.getTokenType();
-            assertTrue(errorMsg, tokenPartialEq(token, expected));
+            assertTrue(tokenPartialEq(token, expected), errorMsg);
         }
     }
 
     @Test
-    public void splitsIdentifiers() {
+    public void testSplitsIdentifiers() {
         String src = "let for if aaaaaa_aaaa";
         Lexer lex = new Lexer(src);
         ArrayList<Token> expectedTokens = new ArrayList<>();
@@ -107,12 +109,12 @@ public class Tests {
             }
 
             String errorMsg = expectedMsg + " " + gotMsg;
-            assertTrue(errorMsg, tokenEq(token, expected));
+            assertTrue(tokenEq(token, expected), errorMsg);
         }
     }
 
     @Test
-    public void canCheckPartEqInIdentifiers() {
+    public void testPartEqInIdentifiers() {
         Lexer lex = new Lexer("aaa");
         Token token = lex.nextToken();
 
@@ -126,6 +128,27 @@ public class Tests {
         }
 
         String errorMsg = expectedMsg + " " + gotMsg;
-        assertTrue(errorMsg, tokenPartialEq(token, expected));
+        assertTrue(tokenPartialEq(token, expected), errorMsg);
+    }
+
+    @Test
+    public void testThrowsOnInvalidChars() {
+        assertAll(() -> {
+            assertThrows(RuntimeException.class, () -> {
+                String src = "\\,@";
+                Lexer lex = new Lexer(src);
+                for (int i = 0; i < src.length(); i++) {
+                    lex.nextToken();
+                }
+            }, "Should throw when parsing non-valid characters");
+
+            assertThrows(RuntimeException.class, () -> {
+                String src = "  a   \naaa  .\\,@";
+                Lexer lex = new Lexer(src);
+                for (int i = 0; i < src.length(); i++) {
+                    lex.nextToken();
+                }
+            }, "Should throw when parsing non-valid characters");
+        });
     }
 }

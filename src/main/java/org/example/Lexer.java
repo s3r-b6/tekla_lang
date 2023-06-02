@@ -6,12 +6,14 @@ import org.example.TokenUtils.Token;
 public class Lexer {
     private String src;
     private int startPos;
+    private int line;
     private int position;
     private char ch;
 
     Lexer(String src) {
         this.startPos = 0;
         this.position = 0;
+        this.line = 0;
         this.ch = 0;
         this.src = src;
 
@@ -56,6 +58,7 @@ public class Lexer {
             }
             case '\n' -> {
                 this.readChar();
+                this.line += 1;
                 return nextToken();
             }
             case '\r' -> {
@@ -66,16 +69,14 @@ public class Lexer {
             case 0 -> t = new SimpleToken(EOF);
 
             default -> {
-                if ((this.ch >= 'a' && this.ch <= 'z') || (this.ch >= 'A' && this.ch <= 'Z')) {
+                if (isAlphabetic(this.ch)) {
                     StringBuilder identifier = new StringBuilder(this.ch);
 
                     // While we read valid identifier-chars
-                    while ((this.ch >= 'a' && this.ch <= 'z') || (this.ch >= 'A' && this.ch <= 'Z') || this.ch == '_') {
+                    while (isAlphabetic(this.ch) || this.ch == '_') {
                         identifier.append(this.ch);
                         this.readChar();
                     }
-
-                    System.out.println("Identifier: " + identifier);
 
                     // TODO: Make this better
                     switch (identifier.toString().toLowerCase().trim()) {
@@ -91,11 +92,20 @@ public class Lexer {
         }
 
         if (t == null) {
-            throw new RuntimeException("Invalid token: '" + this.ch + "'");
+            String errorMsg = "Invalid token: '" + this.ch + "' in line " + this.line;
+            System.out.println(errorMsg); // TEST:
+
+            // TODO: Instead of killing the process on error, use a bool hadError=true and
+            // store all errorMsgs
+            throw new RuntimeException(errorMsg);
         }
 
         this.readChar();
         return t;
+    }
+
+    private boolean isAlphabetic(char c) {
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
     }
 
     // Move the pointer a single char.
