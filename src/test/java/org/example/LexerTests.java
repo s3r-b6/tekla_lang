@@ -3,21 +3,34 @@ package org.example;
 import static org.example.TokenUtils.tokenPartialEq;
 import static org.example.TokenUtils.tokenEq;
 import static org.example.TokenUtils.TokenType.*;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
 
 import org.example.TokenUtils.Token;
+import org.example.TokenUtils.TokenType;
 import org.junit.jupiter.api.Test;
 
 public class LexerTests {
+    public static void printTestInfo(String desc, String src) {
+        String BLUE = "\033[1;94m";
+        String NO_COLOR = "\033[0m";
+        System.out.printf("\n[%sTEST%s] Testing %s\n", BLUE, NO_COLOR, desc);
+        if (!src.equals("")) {
+            System.out.printf("  [%sSOURCE_START%s]\n", BLUE, NO_COLOR);
+            System.out.printf("    %s\n", src);
+            System.out.printf("  [%sSOURCE_END%s]\n", BLUE, NO_COLOR);
+        }
+    }
+
+
     @Test
     public void testCorrectSimpleTokens() {
         String src = "(){}+ =,;";
         Lexer lex = new Lexer(src);
+
+        printTestInfo("parses simple tokens", src);
 
         ArrayList<Token> expectedTokens = new ArrayList<>();
         expectedTokens.add(new SimpleToken(LParen));
@@ -31,7 +44,8 @@ public class LexerTests {
 
         for (Token expected : expectedTokens) {
             Token token = lex.nextToken();
-            String errorMsg = "Expected: " + expected.getTokenType() + " Got: " + token.getTokenType();
+            String errorMsg =
+                    "Expected: " + expected.getTokenType() + " Got: " + token.getTokenType();
             assertTrue(tokenPartialEq(token, expected), errorMsg);
         }
     }
@@ -41,6 +55,8 @@ public class LexerTests {
         String src = "//Test Comment\n  ()  {}\n+ =,;";
         Lexer lex = new Lexer(src);
 
+        printTestInfo("ignores comments", src);
+
         ArrayList<Token> expectedTokens = new ArrayList<>();
         expectedTokens.add(new SimpleToken(LParen));
         expectedTokens.add(new SimpleToken(RParen));
@@ -53,7 +69,8 @@ public class LexerTests {
 
         for (Token expected : expectedTokens) {
             Token token = lex.nextToken();
-            String errorMsg = "Expected: " + expected.getTokenType() + " Got: " + token.getTokenType();
+            String errorMsg =
+                    "Expected: " + expected.getTokenType() + " Got: " + token.getTokenType();
             assertTrue(tokenPartialEq(token, expected), errorMsg);
         }
     }
@@ -62,6 +79,8 @@ public class LexerTests {
     public void testIgnoresWhiteSpace() {
         String src = "  ()  {}\n+=,;";
         Lexer lex = new Lexer(src);
+
+        printTestInfo("ignores whitespace", src);
 
         ArrayList<Token> expectedTokens = new ArrayList<>();
         expectedTokens.add(new SimpleToken(LParen));
@@ -75,7 +94,8 @@ public class LexerTests {
 
         for (Token expected : expectedTokens) {
             Token token = lex.nextToken();
-            String errorMsg = "Expected: " + expected.getTokenType() + " Got: " + token.getTokenType();
+            String errorMsg =
+                    "Expected: " + expected.getTokenType() + " Got: " + token.getTokenType();
             assertTrue(tokenPartialEq(token, expected), errorMsg);
         }
     }
@@ -83,6 +103,9 @@ public class LexerTests {
     @Test
     public void testSplitsIdentifiers() {
         String src = "let for if aaaaaa_aaaa";
+
+        printTestInfo("parsing of", src);
+
         Lexer lex = new Lexer(src);
         ArrayList<Token> expectedTokens = new ArrayList<>();
         expectedTokens.add(new SimpleToken(Let));
@@ -96,7 +119,8 @@ public class LexerTests {
             String expectedMsg, gotMsg;
             if (expected instanceof ValueToken) {
                 ValueToken vt = (ValueToken) expected;
-                expectedMsg = "Expected: '" + expected.getTokenType() + "' value: '" + vt.getValue() + "'";
+                expectedMsg = "Expected: '" + expected.getTokenType() + "' value: '" + vt.getValue()
+                        + "'";
             } else {
                 expectedMsg = "Expected: '" + expected.getTokenType() + "'";
             }
@@ -114,9 +138,61 @@ public class LexerTests {
     }
 
     @Test
+    public void testCanParseCode() {
+        String src = """
+                let ten = 10;
+
+                    let add = func(x, y) {
+                      x + y;
+                    };
+
+                    let result = add(five, ten);
+                    !-/*5;
+                    5 < 10 > 5;
+                    `
+
+                    // [...]
+                            """;
+
+        printTestInfo("parses more complex strings", src);
+
+        Lexer lex = new Lexer(src);
+        Token t = lex.nextToken();
+
+
+        ArrayList<Token> tokens = new ArrayList<>();
+        tokens.add(t);
+        while (!tokenEq(t, new SimpleToken(EOF))) {
+            t = lex.nextToken();
+            tokens.add(t);
+        }
+
+        TokenType[] expectedTypes = {Let, Identifier, Equal, Integer, Semicolon, Let, Identifier,
+                Equal, Function, LParen, Identifier, Comma, Identifier, RParen, LBrace, Identifier,
+                Plus, Identifier, Semicolon, RBrace, Semicolon, Let, Identifier, Equal, Identifier,
+                LParen, Identifier, Comma, Identifier, RParen, Semicolon, Bang, Minus, Slash,
+                Illegal, Integer, Semicolon, Integer, Less, Integer, Greater, Integer, Semicolon,
+                Illegal, EOF};
+
+
+        for (int i = 0; i < tokens.size(); i++) {
+            TokenType tokenType = tokens.get(i).getTokenType();
+            TokenType expectedType = expectedTypes[i];
+            String failMsg = "\n\s\s[FAIL: " + i + "] Type " + tokenType.toString()
+                    + " should match: " + expectedType.toString();
+
+            assertTrue(tokenType.equals(expectedType), failMsg);
+        }
+
+        tokens.add(t);
+    }
+
+    @Test
     public void testPartEqInIdentifiers() {
         Lexer lex = new Lexer("aaa");
         Token token = lex.nextToken();
+
+        printTestInfo("partial comparation of tokens", "aaa");
 
         ValueToken expected = new ValueToken(Identifier, "bbb");
 
@@ -135,27 +211,23 @@ public class LexerTests {
     public void testReturnsIllegalTokens() {
         Lexer lex = new Lexer("#~##");
         ArrayList<IllegalToken> errors = new ArrayList<>();
+
+        printTestInfo("parses illegal tokens", "#~##");
+
         for (int i = 0; i < 4; i++) {
             errors.add((IllegalToken) lex.nextToken());
         }
 
-        errors.forEach(e -> e.print());
-
-        assertTrue(errors.size() == 4);
-    }
-
-    @Test
-    public void testPrintsErrors() {
-        Lexer lex = new Lexer("#~##");
-        for (int i = 0; i < 4; i++) {
-            lex.nextToken();
-        }
         lex.printErrors();
+        assertTrue(errors.size() == 4);
     }
 
     @Test
     public void testHandlesStrings() {
         Lexer lex = new Lexer("\"test\"");
+
+        printTestInfo("handles a single String", "\"test\"");
+
         ValueToken tok = (ValueToken) lex.nextToken();
         ValueToken tok2 = new ValueToken(String, "test");
         assertTrue(tok instanceof ValueToken);
@@ -165,6 +237,9 @@ public class LexerTests {
     @Test
     public void testHandlesWrongStrings() {
         Lexer lex = new Lexer("\"test");
+
+        printTestInfo("handles a single non-terminated string", "\"test");
+
         Token tok = lex.nextToken();
         assertTrue(tok instanceof IllegalToken);
         assertTrue(tokenPartialEq(tok, new IllegalToken()));
@@ -173,6 +248,8 @@ public class LexerTests {
     @Test
     public void testHandlesIntegers() {
         Lexer lex = new Lexer("1234 1234   //test \n 1234");
+
+        printTestInfo("hanles integers", "1234 1234   //test \n 1234");
 
         Token t = lex.nextToken();
 
@@ -189,6 +266,9 @@ public class LexerTests {
     @Test
     public void testHandlesWrongIntegers() {
         Lexer lex = new Lexer("1234aaaa   1233! 12345");
+
+        printTestInfo("handles invalid integers", "1234aaaa   1233! 12345");
+
         for (int i = 0; i < 2; i++) {
             Token tok = lex.nextToken();
             assertTrue(tok instanceof IllegalToken);
@@ -198,11 +278,15 @@ public class LexerTests {
         assertTrue(lex.nextToken() instanceof ValueToken);
         assertTrue(tokenEq(lex.nextToken(), new SimpleToken(EOF)));
         assertTrue(tokenEq(lex.nextToken(), new SimpleToken(EOF)));
+
         lex.printErrors();
     }
 
     public void testReadsUntilEOF() {
         Lexer lex = new Lexer("asfjlkqwjkl   =  let ");
+
+        printTestInfo("reads EOF when pos >= length of src", "");
+
         Token t = lex.nextToken();
 
         int i = 0;
