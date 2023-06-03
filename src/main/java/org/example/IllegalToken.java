@@ -33,7 +33,7 @@ public class IllegalToken implements Token {
         this.value = "";
     }
 
-    public void printError() {
+    public void print() {
         System.err.printf("  [%sPARSING_ERROR%s] => %s \n", RED, NO_COLOR, this.toString());
     }
 

@@ -29,6 +29,8 @@ public class TokenUtils {
 
     interface Token {
         public TokenType getTokenType();
+
+        public void print();
     }
 
     public static boolean tokenPartialEq(Token t1, Token t2) {
@@ -36,8 +38,8 @@ public class TokenUtils {
     }
 
     public static boolean tokenEq(Token t1, Token t2) {
-        boolean areOfSameClass = (t1 instanceof SimpleToken && t2 instanceof SimpleToken) ||
-                (t1 instanceof ValueToken && t2 instanceof ValueToken);
+        boolean areOfSameClass = (t1 instanceof SimpleToken && t2 instanceof SimpleToken)
+                || (t1 instanceof ValueToken && t2 instanceof ValueToken);
 
         if (areOfSameClass) {
             if (t1 instanceof SimpleToken) {
@@ -59,6 +61,10 @@ public class TokenUtils {
 
     public static boolean isDigit(char c) {
         return c >= '0' && c <= '9';
+    }
+
+    public static boolean isEOF(Token t) {
+        return (t instanceof SimpleToken && t.getTokenType() == TokenType.EOF);
     }
 
     public static HashMap<String, SimpleToken> createKeywordMap() {

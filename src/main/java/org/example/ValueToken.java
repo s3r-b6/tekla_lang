@@ -19,4 +19,9 @@ public class ValueToken implements Token {
     public String getValue() {
         return this.value;
     }
+
+    @Override
+    public void print() {
+        System.out.printf("[TOKEN] TokenType: %s Value: %s\n", this.t, this.value);
+    }
 }

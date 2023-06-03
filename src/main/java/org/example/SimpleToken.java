@@ -13,4 +13,9 @@ public class SimpleToken implements Token {
     public TokenType getTokenType() {
         return this.t;
     }
+
+    @Override
+    public void print() {
+        System.out.printf("[TOKEN] TokenType: %s\n", this.t);
+    }
 }

@@ -2,6 +2,7 @@ package org.example;
 
 import static org.example.TokenUtils.tokenPartialEq;
 import static org.example.TokenUtils.tokenEq;
+import static org.example.TokenUtils.isEOF;
 import static org.example.TokenUtils.TokenType.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -162,7 +163,7 @@ public class LexerTests {
 
         ArrayList<Token> tokens = new ArrayList<>();
         tokens.add(t);
-        while (!tokenEq(t, new SimpleToken(EOF))) {
+        while (!isEOF(t)) {
             t = lex.nextToken();
             tokens.add(t);
         }
@@ -254,7 +255,7 @@ public class LexerTests {
         Token t = lex.nextToken();
 
         int i = 0;
-        while (!tokenEq(t, new SimpleToken(EOF))) {
+        while (!isEOF(t)) {
             t = lex.nextToken();
             tokenEq(t, new ValueToken(Integer, "1234"));
             i += 1;
@@ -290,7 +291,7 @@ public class LexerTests {
         Token t = lex.nextToken();
 
         int i = 0;
-        while (!tokenEq(t, new SimpleToken(EOF))) {
+        while (!isEOF(t)) {
             t = lex.nextToken();
             i += 1;
         }

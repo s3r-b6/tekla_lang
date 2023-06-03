@@ -154,6 +154,26 @@ public class Lexer {
         return t;
     }
 
+    public ArrayList<Token> readUntilNewlineOrEOF() {
+        ArrayList<Token> list = new ArrayList<>();
+
+        int line = this.line;
+        Token t = this.nextToken();
+
+        while (line == this.line && !isEOF(t)) {
+            list.add(t);
+            t = this.nextToken();
+        }
+
+        list.add(t); // EOF
+
+        return list;
+    }
+
+    public boolean hadError() {
+        return this.hadError;
+    }
+
     public boolean nextMatches(char c) {
         this.consumeChar();
         return this.currChar == c;
@@ -221,14 +241,20 @@ public class Lexer {
         this.consumeChar(); // Skip the first
 
         StringBuilder lit = new StringBuilder();
-        while (this.currChar != '"' && this.position < this.source.length()) {
+
+        // A string should only span 1 line and should always be terminated
+        while (this.currChar != '"' && this.currChar != '\n'
+                && this.position < this.source.length()) {
             lit.append(this.currChar);
             this.consumeChar();
         }
 
         // File ended without string termination
         if (this.currChar != '"') {
-            return new IllegalToken("Unterminated String: ", lit.toString(), this.line);
+            this.hadError = true;
+            IllegalToken t = new IllegalToken("Unterminated String: ", lit.toString(), this.line);
+            errorList.add(t);
+            return t;
         }
 
         return new ValueToken(String, lit.toString());
