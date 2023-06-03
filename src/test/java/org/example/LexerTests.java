@@ -156,10 +156,18 @@ public class LexerTests {
     @Test
     public void testHandlesStrings() {
         Lexer lex = new Lexer("\"test\"");
-        Token tok = lex.nextToken();
+        ValueToken tok = (ValueToken) lex.nextToken();
         ValueToken tok2 = new ValueToken(String, "test");
         assertTrue(tok instanceof ValueToken);
         assertTrue(tokenEq(tok, tok2));
+    }
+
+    @Test
+    public void testHandlesWrongStrings() {
+        Lexer lex = new Lexer("\"test");
+        Token tok = lex.nextToken();
+        assertTrue(tok instanceof IllegalToken);
+        assertTrue(tokenPartialEq(tok, new IllegalToken('\0', 0)));
     }
 
     @Test

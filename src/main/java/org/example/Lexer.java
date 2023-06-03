@@ -48,48 +48,38 @@ public class Lexer {
             case ';' -> t = new SimpleToken(Semicolon);
 
             case '"' -> {
-                this.readChar(); // Skip the first
-
-                StringBuilder lit = new StringBuilder();
-                while (this.ch != '"') {
-                    lit.append(this.ch);
-                    this.readChar();
-                }
-
-                return new ValueToken(String, lit.toString());
+                return handleString();
             }
-
+            case '<' -> {
+                return nextMatches('=')
+                        ? new SimpleToken(Less_Equal)
+                        : new SimpleToken(Less);
+            }
+            case '>' -> {
+                return nextMatches('=')
+                        ? new SimpleToken(Greater_Equal)
+                        : new SimpleToken(Greater);
+            }
             case '!' -> {
-                this.readChar();
-                if (this.ch == '=') {
-                    return new SimpleToken(Not_Equal);
-                }
+                return nextMatches('=')
+                        ? new SimpleToken(Not_Equal)
+                        : new SimpleToken(Bang);
 
-                return new SimpleToken(Bang);
             }
             case '=' -> {
-                this.readChar();
-                if (this.ch == '=') {
-                    return new SimpleToken(Equal_Equal);
-                }
-
-                return new SimpleToken(Equal);
+                return nextMatches('=')
+                        ? new SimpleToken(Equal_Equal)
+                        : new SimpleToken(Equal);
             }
             case '+' -> {
-                this.readChar();
-                if (this.ch == '=') {
-                    return new SimpleToken(Plus_Equal);
-                }
-
-                return new SimpleToken(Plus);
+                return nextMatches('=')
+                        ? new SimpleToken(Plus_Equal)
+                        : new SimpleToken(Plus);
             }
             case '-' -> {
-                this.readChar();
-                if (this.ch == '-') {
-                    return new SimpleToken(Minus_Equal);
-                }
-
-                return new SimpleToken(Minus);
+                return nextMatches('=')
+                        ? new SimpleToken(Minus_Equal)
+                        : new SimpleToken(Minus);
             }
 
             // Comments and slash
@@ -107,8 +97,8 @@ public class Lexer {
                 return nextToken();
             }
             case '\n' -> {
-                this.readChar();
                 this.line += 1;
+                this.readChar();
                 return nextToken();
             }
             case '\r' -> {
@@ -151,20 +141,42 @@ public class Lexer {
         }
 
         this.readChar();
-
         return t;
+    }
+
+    public boolean nextMatches(char c) {
+        this.readChar();
+        return this.ch == c;
     }
 
     public void printErrors() {
         if (!this.hadError) {
-            System.out.println("No errors found while parsing");
+            System.out.println("[ERRORS] No errors found while parsing");
             return;
         }
 
-        System.err.printf("%d errors found while parsing the file:%n", errorList.size());
-        for (IllegalToken it : errorList) {
-            it.print();
+        System.err.printf("[ERRORS] %d errors found while parsing the file:%n", errorList.size());
+        for (int i = 0; i < errorList.size(); i++) {
+            errorList.get(i).printIndex(i);
         }
+
+    }
+
+    private Token handleString() {
+        this.readChar(); // Skip the first
+
+        StringBuilder lit = new StringBuilder();
+        while (this.ch != '"' && this.position < this.src.length()) {
+            lit.append(this.ch);
+            this.readChar();
+        }
+
+        // File ended without string termination
+        if (this.ch != '"') {
+            return new IllegalToken("Unterminated String: " + lit.toString(), this.line);
+        }
+
+        return new ValueToken(String, lit.toString());
     }
 
     private Token handleSlash() {

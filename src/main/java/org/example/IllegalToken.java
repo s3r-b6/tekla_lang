@@ -6,20 +6,31 @@ import org.example.TokenUtils.Token;
 public class IllegalToken implements Token {
     TokenType t;
     int line;
-    char value;
+    String value;
 
-    public IllegalToken(char value, int line) {
+    public IllegalToken(String value, int line) {
         this.t = TokenType.Illegal;
         this.line = line;
         this.value = value;
     }
 
-    public void print() {
-        System.err.println(this.toString());
+    public IllegalToken(char c, int line) {
+        this.t = TokenType.Illegal;
+        this.line = line;
+        this.value = String.valueOf(c);
     }
 
+    public void print() {
+        System.err.println("\s\s[ERROR] => " + this.toString());
+    }
+
+    public void printIndex(int num) {
+        System.err.println("\s\s[ERROR: " + num + "] => " + this.toString());
+    }
+
+    @Override
     public String toString() {
-        return String.format("\s=> Illegal token: '%c' in line: %d", this.value, this.line);
+        return String.format("Illegal token: '%s' in line: %d", this.value, this.line);
     }
 
     public TokenType getTokenType() {
