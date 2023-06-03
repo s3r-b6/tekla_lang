@@ -1,36 +1,25 @@
 package org.example;
 
 import static org.example.TokenUtils.TokenType.*;
-import org.example.TokenUtils.Token;
+import static org.example.TokenUtils.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Lexer {
-    private static HashMap<String, SimpleToken> keywords = new HashMap<>();
-
-    static {
-        keywords.put("let", new SimpleToken(Let));
-        keywords.put("if", new SimpleToken(If));
-        keywords.put("for", new SimpleToken(For));
-        keywords.put("func", new SimpleToken(For));
-        keywords.put("while", new SimpleToken(While));
-        keywords.put("return", new SimpleToken(Return));
-        keywords.put("true", new SimpleToken(True));
-        keywords.put("false", new SimpleToken(False));
-    }
+    private static HashMap<String, SimpleToken> keywords = createKeywordMap();
 
     private int line;
     private int position;
     private char currChar;
-    private String source;
+    private final String source;
 
     private boolean hadError = false;
-    private ArrayList<IllegalToken> errorList = new ArrayList<>();
+    private final ArrayList<IllegalToken> errorList = new ArrayList<>();
 
     Lexer(String src) {
         this.position = 0;
-        this.currChar = 0;
+        this.currChar = '\0';
         this.line = 0;
         this.source = src;
 
@@ -38,21 +27,43 @@ public class Lexer {
     }
 
     /*
-     * 1-length tokens that don't have special cases are assigned to t; The rest are
-     * directly returned. This is mainly because the switch consumes a char at the
-     * end, and complex cases consume a token to check for the special cases.
-     * If t is null at the end of the switch, it means the char is an IllegalToken
+     * Every single case consumes a char (this is, the cursor is moved 1pos), either
+     * itself, or, the method that is being called to handle the case and then
+     * returns the proper Token.
+     *
+     * For cases that are not ignored (i.e., non-whitespace), value is returned
+     * directly. For cases that are ignored, value is returned recursively.
      */
     public Token nextToken() {
-        Token t = null;
         switch (this.currChar) {
-            case '(' -> t = new SimpleToken(LParen);
-            case ')' -> t = new SimpleToken(RParen);
-            case '{' -> t = new SimpleToken(LBrace);
-            case '}' -> t = new SimpleToken(RBrace);
-            case ',' -> t = new SimpleToken(Comma);
-            case ';' -> t = new SimpleToken(Semicolon);
-            case 0 -> t = new SimpleToken(EOF);
+            case '(' -> {
+                this.consumeChar();
+                return new SimpleToken(LParen);
+            }
+            case ')' -> {
+                this.consumeChar();
+                return new SimpleToken(RParen);
+            }
+            case '{' -> {
+                this.consumeChar();
+                return new SimpleToken(LBrace);
+            }
+            case '}' -> {
+                this.consumeChar();
+                return new SimpleToken(RBrace);
+            }
+            case ',' -> {
+                this.consumeChar();
+                return new SimpleToken(Comma);
+            }
+            case ';' -> {
+                this.consumeChar();
+                return new SimpleToken(Semicolon);
+            }
+            case 0 -> {
+                this.consumeChar();
+                return new SimpleToken(EOF);
+            }
 
             case '<' -> {
                 return nextMatches('=')
@@ -121,13 +132,13 @@ public class Lexer {
             }
         }
 
-        if (t == null) {
-            t = new IllegalToken("Unknown token ", this.currChar, this.line);
-            errorList.add((IllegalToken) t);
-            hadError = true;
-        }
+        // If we ended up here, it is not a valid char
+        IllegalToken t = new IllegalToken("Unknown token ", this.currChar, this.line);
 
+        hadError = true;
+        errorList.add(t);
         this.consumeChar();
+
         return t;
     }
 
@@ -220,18 +231,10 @@ public class Lexer {
         }
     }
 
-    private boolean isAlphabetic(char c) {
-        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
-    }
-
-    private boolean isDigit(char c) {
-        return c >= '0' && c <= '9';
-    }
-
     // Move the pointer a single char.
     private void consumeChar() {
         if (this.position >= this.source.length()) {
-            this.currChar = 0; // EOF
+            this.currChar = '\0'; // EOF
         } else {
             this.currChar = this.source.charAt(this.position); // Whatever char
         }

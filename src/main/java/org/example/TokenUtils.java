@@ -1,5 +1,7 @@
 package org.example;
 
+import java.util.HashMap;
+
 public class TokenUtils {
     public enum TokenType {
         Illegal, EOF,
@@ -49,5 +51,26 @@ public class TokenUtils {
         }
 
         return false;
+    }
+
+    public static boolean isAlphabetic(char c) {
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+    }
+
+    public static boolean isDigit(char c) {
+        return c >= '0' && c <= '9';
+    }
+
+    public static HashMap<String, SimpleToken> createKeywordMap() {
+        HashMap<String, SimpleToken> keywords = new HashMap<>();
+        keywords.put("let", new SimpleToken(TokenType.Let));
+        keywords.put("if", new SimpleToken(TokenType.If));
+        keywords.put("for", new SimpleToken(TokenType.For));
+        keywords.put("func", new SimpleToken(TokenType.Function));
+        keywords.put("while", new SimpleToken(TokenType.While));
+        keywords.put("return", new SimpleToken(TokenType.Return));
+        keywords.put("true", new SimpleToken(TokenType.True));
+        keywords.put("false", new SimpleToken(TokenType.False));
+        return keywords;
     }
 }
