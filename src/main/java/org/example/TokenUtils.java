@@ -8,15 +8,21 @@ public class TokenUtils {
 
         Integer, String,
 
-        For, If, While,
+        For, If, Else,
+        While, Return,
+        Function, Let,
 
-        Greater, Less,
-        Equal, Plus, Minus,
-        Slash,
+        True, False, Bang,
+
+        Greater, Less, Equal, Plus, Minus, Slash,
+        Greater_Equal, Less_Equal, Equal_Equal,
+        Plus_Equal, Minus_Equal, Slash_Equal,
+        Not_Equal,
+
         Comma, Semicolon,
+
         LParen, RParen,
         LBrace, RBrace,
-        Function, Let,
     }
 
     interface Token {

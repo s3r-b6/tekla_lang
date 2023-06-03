@@ -1,13 +1,35 @@
 package org.example;
 
 import static org.example.TokenUtils.TokenType.*;
+import org.example.TokenUtils.TokenType;
 import org.example.TokenUtils.Token;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 public class Lexer {
+    private static HashMap<String, SimpleToken> keywords = new HashMap<>();
+    static {
+        keywords.put("let", new SimpleToken(Let));
+        keywords.put("if", new SimpleToken(If));
+        keywords.put("for", new SimpleToken(For));
+        keywords.put("func", new SimpleToken(For));
+        keywords.put("while", new SimpleToken(While));
+        keywords.put("integer", new SimpleToken(Integer));
+        keywords.put("string", new SimpleToken(String));
+        keywords.put("return", new SimpleToken(Return));
+        keywords.put("true", new SimpleToken(True));
+        keywords.put("false", new SimpleToken(False));
+    }
+
+    private boolean hadError = false;
+    private ArrayList<IllegalToken> errorList = new ArrayList<>();
     private String src;
     private int startPos;
     private int line;
+
     private int position;
+
     private char ch;
 
     Lexer(String src) {
@@ -27,27 +49,48 @@ public class Lexer {
             case ')' -> t = new SimpleToken(RParen);
             case '{' -> t = new SimpleToken(LBrace);
             case '}' -> t = new SimpleToken(RBrace);
-            case '+' -> t = new SimpleToken(Plus);
-            case '=' -> t = new SimpleToken(Equal);
             case ',' -> t = new SimpleToken(Comma);
             case ';' -> t = new SimpleToken(Semicolon);
-            // Special case. It could be a /, or it could be a //.......
-            case '/' -> {
+
+            case '!' -> {
                 this.readChar();
-                if ('/' != this.ch) {
-                    return new SimpleToken(Slash);
+                if (this.ch == '=') {
+                    return new SimpleToken(Not_Equal);
                 }
 
-                while (this.ch != '\n') {
-                    this.readChar();
+                return new SimpleToken(Bang);
+            }
+            case '=' -> {
+                this.readChar();
+                if (this.ch == '=') {
+                    return new SimpleToken(Equal_Equal);
                 }
-                this.readChar(); // Also move the pointer past the \n (the switch would do it anyway)
 
-                return nextToken();
+                return new SimpleToken(Equal);
+            }
+            case '+' -> {
+                this.readChar();
+                if (this.ch == '=') {
+                    return new SimpleToken(Plus_Equal);
+                }
+
+                return new SimpleToken(Plus);
+            }
+            case '-' -> {
+                this.readChar();
+                if (this.ch == '-') {
+                    return new SimpleToken(Minus_Equal);
+                }
+
+                return new SimpleToken(Minus);
             }
 
-            // I kind of don't like this solution.
-            // Advances the pointer and recursively returns the next valid Token.
+            // Comments and slash
+            case '/' -> {
+                return handleSlash();
+            }
+
+            // Whitespace
             case ' ' -> {
                 this.readChar();
                 return nextToken();
@@ -69,39 +112,63 @@ public class Lexer {
             case 0 -> t = new SimpleToken(EOF);
 
             default -> {
-                if (isAlphabetic(this.ch)) {
-                    StringBuilder identifier = new StringBuilder(this.ch);
-
-                    // While we read valid identifier-chars
-                    while (isAlphabetic(this.ch) || this.ch == '_') {
-                        identifier.append(this.ch);
-                        this.readChar();
-                    }
-
-                    // TODO: Make this better
-                    switch (identifier.toString().toLowerCase().trim()) {
-                        case "let" -> t = new SimpleToken(Let);
-                        case "if" -> t = new SimpleToken(If);
-                        case "for" -> t = new SimpleToken(For);
-                        case "while" -> t = new SimpleToken(While);
-                        // It may be a variable
-                        default -> t = new ValueToken(Identifier, identifier.toString());
-                    }
+                if (!isAlphabetic(this.ch)) {
+                    break;
                 }
+
+                // Identifier case
+                StringBuilder identifier = new StringBuilder(this.ch);
+                while (isAlphabetic(this.ch) || this.ch == '_') {
+                    identifier.append(this.ch);
+                    this.readChar();
+                }
+
+                String identifierStr = identifier.toString();
+                System.out.printf("Ident: %s%n", identifierStr);
+                if (keywords.containsKey(identifierStr)) {
+                    return keywords.get(identifierStr);
+                }
+                // We have something that could be a valid identifier
+                return new ValueToken(Identifier, identifier.toString());
             }
         }
 
         if (t == null) {
-            String errorMsg = "Invalid token: '" + this.ch + "' in line " + this.line;
-            System.out.println(errorMsg); // TEST:
-
-            // TODO: Instead of killing the process on error, use a bool hadError=true and
-            // store all errorMsgs
-            throw new RuntimeException(errorMsg);
+            t = new IllegalToken(this.ch, this.line);
+            errorList.add((IllegalToken) t);
+            hadError = true;
         }
 
         this.readChar();
+
         return t;
+    }
+
+    public void printErrors() {
+        if (!this.hadError) {
+            System.out.println("No errors found while parsing");
+            return;
+        }
+
+        System.err.printf("%d errors found while parsing the file:%n", errorList.size());
+        for (IllegalToken it : errorList) {
+            it.print();
+        }
+    }
+
+    private Token handleSlash() {
+        this.readChar();
+        if ('/' == this.ch) {
+            while (this.ch != '\n') {
+                this.readChar();
+            }
+
+            return nextToken();
+        } else if ('=' == this.ch) {
+            return new SimpleToken(Slash_Equal);
+        } else {
+            return new SimpleToken(Slash);
+        }
     }
 
     private boolean isAlphabetic(char c) {

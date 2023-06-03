@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 public class LexerTests {
     @Test
     public void testCorrectSimpleTokens() {
-        String src = "(){}+=,;";
+        String src = "(){}+ =,;";
         Lexer lex = new Lexer(src);
 
         ArrayList<Token> expectedTokens = new ArrayList<>();
@@ -38,7 +38,7 @@ public class LexerTests {
 
     @Test
     public void testIgnoresComments() {
-        String src = "//Test Comment\n  ()  {}\n+=,;";
+        String src = "//Test Comment\n  ()  {}\n+ =,;";
         Lexer lex = new Lexer(src);
 
         ArrayList<Token> expectedTokens = new ArrayList<>();
@@ -68,7 +68,7 @@ public class LexerTests {
         expectedTokens.add(new SimpleToken(RParen));
         expectedTokens.add(new SimpleToken(LBrace));
         expectedTokens.add(new SimpleToken(RBrace));
-        expectedTokens.add(new SimpleToken(Plus));
+        expectedTokens.add(new SimpleToken(Plus_Equal));
         expectedTokens.add(new SimpleToken(Equal));
         expectedTokens.add(new SimpleToken(Comma));
         expectedTokens.add(new SimpleToken(Semicolon));
@@ -132,23 +132,24 @@ public class LexerTests {
     }
 
     @Test
-    public void testThrowsOnInvalidChars() {
-        assertAll(() -> {
-            assertThrows(RuntimeException.class, () -> {
-                String src = "\\,@";
-                Lexer lex = new Lexer(src);
-                for (int i = 0; i < src.length(); i++) {
-                    lex.nextToken();
-                }
-            }, "Should throw when parsing non-valid characters");
+    public void testReturnsIllegalTokens() {
+        Lexer lex = new Lexer("#~##");
+        ArrayList<IllegalToken> errors = new ArrayList<>();
+        for (int i = 0; i < 4; i++) {
+            errors.add((IllegalToken) lex.nextToken());
+        }
 
-            assertThrows(RuntimeException.class, () -> {
-                String src = "  a   \naaa  .\\,@";
-                Lexer lex = new Lexer(src);
-                for (int i = 0; i < src.length(); i++) {
-                    lex.nextToken();
-                }
-            }, "Should throw when parsing non-valid characters");
-        });
+        errors.forEach(e -> e.print());
+
+        assertTrue(errors.size() == 4);
+    }
+
+    @Test
+    public void testPrintsErrors() {
+        Lexer lex = new Lexer("#~##");
+        for (int i = 0; i < 4; i++) {
+            lex.nextToken();
+        }
+        lex.printErrors();
     }
 }

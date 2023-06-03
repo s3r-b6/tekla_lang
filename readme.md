@@ -1,6 +1,6 @@
 This is a project to build a small lang with an interpreter. 
 
-Inspired by ThePrimeagen's streams where he builds an interpreter in different languages [(check his repo])(https://github.com/ThePrimeagen/ts-rust-zig-deez/)
+Inspired by ThePrimeagen's streams where he builds an interpreter in different languages [(check his repo)](https://github.com/ThePrimeagen/ts-rust-zig-deez/)
 
 JavaScript was my first language, then I learned some Java and later on some Rust and when I had to go back to JS I felt like I didn't understand at all what was happening (and absolutely hated it).
 I hope this project can help me understand how languages in general work, and in particular, how interpreted languages work.
