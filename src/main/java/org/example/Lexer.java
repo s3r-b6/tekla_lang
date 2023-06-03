@@ -15,8 +15,6 @@ public class Lexer {
         keywords.put("for", new SimpleToken(For));
         keywords.put("func", new SimpleToken(For));
         keywords.put("while", new SimpleToken(While));
-        keywords.put("integer", new SimpleToken(Integer));
-        keywords.put("string", new SimpleToken(String));
         keywords.put("return", new SimpleToken(Return));
         keywords.put("true", new SimpleToken(True));
         keywords.put("false", new SimpleToken(False));
@@ -25,7 +23,6 @@ public class Lexer {
     private boolean hadError = false;
     private ArrayList<IllegalToken> errorList = new ArrayList<>();
     private String src;
-    private int startPos;
     private int line;
 
     private int position;
@@ -33,7 +30,6 @@ public class Lexer {
     private char ch;
 
     Lexer(String src) {
-        this.startPos = 0;
         this.position = 0;
         this.line = 0;
         this.ch = 0;
@@ -51,6 +47,18 @@ public class Lexer {
             case '}' -> t = new SimpleToken(RBrace);
             case ',' -> t = new SimpleToken(Comma);
             case ';' -> t = new SimpleToken(Semicolon);
+
+            case '"' -> {
+                this.readChar(); // Skip the first
+
+                StringBuilder lit = new StringBuilder();
+                while (this.ch != '"') {
+                    lit.append(this.ch);
+                    this.readChar();
+                }
+
+                return new ValueToken(String, lit.toString());
+            }
 
             case '!' -> {
                 this.readChar();
@@ -124,7 +132,6 @@ public class Lexer {
                 }
 
                 String identifierStr = identifier.toString();
-                System.out.printf("Ident: %s%n", identifierStr);
                 if (keywords.containsKey(identifierStr)) {
                     return keywords.get(identifierStr);
                 }
@@ -183,7 +190,6 @@ public class Lexer {
             this.ch = this.src.charAt(this.position); // Whatever char
         }
 
-        this.startPos = this.position;
         this.position += 1;
     }
 }

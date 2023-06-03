@@ -152,4 +152,13 @@ public class LexerTests {
         }
         lex.printErrors();
     }
+
+    @Test
+    public void testHandlesStrings() {
+        Lexer lex = new Lexer("\"test\"");
+        Token tok = lex.nextToken();
+        ValueToken tok2 = new ValueToken(String, "test");
+        assertTrue(tok instanceof ValueToken);
+        assertTrue(tokenEq(tok, tok2));
+    }
 }
