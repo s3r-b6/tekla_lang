@@ -1,7 +1,6 @@
 package org.example;
 
 import static org.example.TokenUtils.TokenType.*;
-import org.example.TokenUtils.TokenType;
 import org.example.TokenUtils.Token;
 
 import java.util.ArrayList;
@@ -120,23 +119,28 @@ public class Lexer {
             case 0 -> t = new SimpleToken(EOF);
 
             default -> {
-                if (!isAlphabetic(this.ch)) {
-                    break;
-                }
+                if (isAlphabetic(this.ch)) {
+                    // Identifier case
+                    StringBuilder identifier = new StringBuilder(this.ch);
+                    while (isAlphabetic(this.ch) || this.ch == '_') {
+                        identifier.append(this.ch);
+                        this.readChar();
+                    }
 
-                // Identifier case
-                StringBuilder identifier = new StringBuilder(this.ch);
-                while (isAlphabetic(this.ch) || this.ch == '_') {
-                    identifier.append(this.ch);
-                    this.readChar();
+                    String identifierStr = identifier.toString();
+                    if (keywords.containsKey(identifierStr)) {
+                        return keywords.get(identifierStr);
+                    }
+                    // We have something that could be a valid identifier
+                    return new ValueToken(Identifier, identifier.toString());
+                } else if (isDigit(this.ch)) {
+                    StringBuilder value = new StringBuilder(this.ch);
+                    while (isDigit(this.ch)) {
+                        value.append(this.ch);
+                        this.readChar();
+                    }
+                    return new ValueToken(Integer, value.toString());
                 }
-
-                String identifierStr = identifier.toString();
-                if (keywords.containsKey(identifierStr)) {
-                    return keywords.get(identifierStr);
-                }
-                // We have something that could be a valid identifier
-                return new ValueToken(Identifier, identifier.toString());
             }
         }
 
@@ -180,6 +184,10 @@ public class Lexer {
 
     private boolean isAlphabetic(char c) {
         return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+    }
+
+    private boolean isDigit(char c) {
+        return c >= '0' && c <= '9';
     }
 
     // Move the pointer a single char.

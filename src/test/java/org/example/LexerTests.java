@@ -161,4 +161,33 @@ public class LexerTests {
         assertTrue(tok instanceof ValueToken);
         assertTrue(tokenEq(tok, tok2));
     }
+
+    @Test
+    public void testHandlesIntegers() {
+        Lexer lex = new Lexer("1234 1234   //test \n 1234");
+
+        Token t = lex.nextToken();
+
+        int i = 0;
+        while (!tokenEq(t, new SimpleToken(EOF))) {
+            t = lex.nextToken();
+            tokenEq(t, new ValueToken(Integer, "1234"));
+            i += 1;
+        }
+
+        assertTrue(i == 3); // There are 3 tokens (3 integers)
+    }
+
+    public void testReadsUntilEOF() {
+        Lexer lex = new Lexer("asfjlkqwjkl   =  let ");
+        Token t = lex.nextToken();
+
+        int i = 0;
+        while (!tokenEq(t, new SimpleToken(EOF))) {
+            t = lex.nextToken();
+            i += 1;
+        }
+
+        assertTrue(i == 3); // There are 3 tokens: an ident, an equals and a let
+    }
 }
