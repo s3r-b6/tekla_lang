@@ -27,12 +27,11 @@ public class Lexer {
     }
 
     /*
-     * Every single case consumes a char (this is, the cursor is moved 1pos), either
-     * itself, or, the method that is being called to handle the case and then
-     * returns the proper Token.
+     * Every single case consumes a char (this is, the cursor is moved 1pos), either itself, or, the
+     * method that is being called to handle the case and then returns the proper Token.
      *
-     * For cases that are not ignored (i.e., non-whitespace), value is returned
-     * directly. For cases that are ignored, value is returned recursively.
+     * For cases that are not ignored (i.e., non-whitespace), value is returned directly. For cases
+     * that are ignored, value is returned recursively.
      */
     public Token nextToken() {
         switch (this.currChar) {
@@ -66,34 +65,47 @@ public class Lexer {
             }
 
             case '<' -> {
-                return nextMatches('=')
-                        ? new SimpleToken(Less_Equal)
-                        : new SimpleToken(Less);
+                if (nextMatches('=')) {
+                    return new SimpleToken(Less_Equal);
+                } else {
+                    return new SimpleToken(Less);
+                }
             }
             case '>' -> {
-                return nextMatches('=')
-                        ? new SimpleToken(Greater_Equal)
-                        : new SimpleToken(Greater);
+                if (nextMatches('=')) {
+                    return new SimpleToken(Greater_Equal);
+                } else {
+                    return new SimpleToken(Greater);
+                }
             }
             case '!' -> {
-                return nextMatches('=')
-                        ? new SimpleToken(Not_Equal)
-                        : new SimpleToken(Bang);
+                if (nextMatches('=')) {
+                    return new SimpleToken(Not_Equal);
+                } else {
+                    return new SimpleToken(Bang);
+                }
             }
             case '=' -> {
-                return nextMatches('=')
-                        ? new SimpleToken(Equal_Equal)
-                        : new SimpleToken(Equal);
+                if (nextMatches('=')) {
+                    return new SimpleToken(Equal_Equal);
+                } else {
+
+                    return new SimpleToken(Equal);
+                }
             }
             case '+' -> {
-                return nextMatches('=')
-                        ? new SimpleToken(Plus_Equal)
-                        : new SimpleToken(Plus);
+                if (nextMatches('=')) {
+                    return new SimpleToken(Plus_Equal);
+                } else {
+                    return new SimpleToken(Plus);
+                }
             }
             case '-' -> {
-                return nextMatches('=')
-                        ? new SimpleToken(Minus_Equal)
-                        : new SimpleToken(Minus);
+                if (nextMatches('=')) {
+                    return new SimpleToken(Minus_Equal);
+                } else {
+                    return new SimpleToken(Minus);
+                }
             }
 
             case '/' -> {
@@ -103,8 +115,8 @@ public class Lexer {
                 return handleString();
             }
 
-            // Since they have to return something, whitespace chars recursively return the
-            // next valid token, and are ignored this way
+            // Since they have to return something (not null), whitespace chars recursively return
+            // the next valid token
             case ' ' -> {
                 this.consumeChar();
                 return nextToken();
@@ -148,16 +160,21 @@ public class Lexer {
     }
 
     public void printErrors() {
+        final String RED = "\033[1;91m";
+        final String NO_COLOR = "\033[0m";
+
         if (!this.hadError) {
-            System.out.println("[ERRORS] No errors found while parsing");
+            System.out.printf("\n[%sPARSING_ERRORS%s] No errors found while parsing\n", RED,
+                    NO_COLOR);
             return;
         }
 
-        System.err.printf("[ERRORS] %d errors found while parsing the file:%n", errorList.size());
+        System.err.printf("\n[%sPARSING_ERRORS%s] %d errors found while parsing the file:\n", RED,
+                NO_COLOR, errorList.size());
         for (int i = 0; i < errorList.size(); i++) {
-            errorList.get(i).printIndex(i);
+            errorList.get(i).printIndexed(i + 1);
         }
-
+        System.out.println();
     }
 
     private Token handleNumberToken() {
@@ -165,7 +182,8 @@ public class Lexer {
         StringBuilder value = new StringBuilder(this.currChar);
         boolean isValid = true;
 
-        while (this.currChar != ' ' && this.position <= this.source.length()) {
+        while (this.currChar != ' ' && this.currChar != ';'
+                && this.position <= this.source.length()) {
             if (!isDigit(this.currChar) && this.currChar != '\0') {
                 isValid = false;
             }

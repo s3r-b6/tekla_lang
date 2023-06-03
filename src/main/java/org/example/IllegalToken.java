@@ -9,6 +9,9 @@ public class IllegalToken implements Token {
     String desc;
     int line;
 
+    final String RED = "\033[1;91m";
+    final String NO_COLOR = "\033[0m";
+
     public IllegalToken(String desc, String value, int line) {
         this.t = TokenType.Illegal;
         this.line = line;
@@ -30,17 +33,19 @@ public class IllegalToken implements Token {
         this.value = "";
     }
 
-    public void print() {
-        System.err.println("\s\s[ERROR] => " + this.toString());
+    public void printError() {
+        System.err.printf("  [%sPARSING_ERROR%s] => %s \n", RED, NO_COLOR, this.toString());
     }
 
-    public void printIndex(int num) {
-        System.err.println("\s\s[ERROR: " + num + "] => " + this.toString());
+    public void printIndexed(int num) {
+        System.err.printf("  [%sPARSING_ERROR:%s %d] => %s \n", RED, NO_COLOR, num,
+                this.toString());
     }
 
     @Override
     public String toString() {
-        return String.format("Illegal token: %s '%s' in line: %d", this.desc, this.value, this.line);
+        return String.format("Illegal token: %s '%s' in line: %d", this.desc, this.value,
+                this.line);
     }
 
     public TokenType getTokenType() {
