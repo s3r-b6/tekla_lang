@@ -167,7 +167,7 @@ public class LexerTests {
         Lexer lex = new Lexer("\"test");
         Token tok = lex.nextToken();
         assertTrue(tok instanceof IllegalToken);
-        assertTrue(tokenPartialEq(tok, new IllegalToken('\0', 0)));
+        assertTrue(tokenPartialEq(tok, new IllegalToken()));
     }
 
     @Test
@@ -184,6 +184,21 @@ public class LexerTests {
         }
 
         assertTrue(i == 3); // There are 3 tokens (3 integers)
+    }
+
+    @Test
+    public void testHandlesWrongIntegers() {
+        Lexer lex = new Lexer("1234aaaa   1233! 12345");
+        for (int i = 0; i < 2; i++) {
+            Token tok = lex.nextToken();
+            assertTrue(tok instanceof IllegalToken);
+            assertTrue(tokenPartialEq(tok, new IllegalToken()));
+        }
+
+        assertTrue(lex.nextToken() instanceof ValueToken);
+        assertTrue(tokenEq(lex.nextToken(), new SimpleToken(EOF)));
+        assertTrue(tokenEq(lex.nextToken(), new SimpleToken(EOF)));
+        lex.printErrors();
     }
 
     public void testReadsUntilEOF() {
