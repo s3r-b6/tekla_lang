@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Lexer {
-    private static HashMap<String, SimpleToken> keywords = createKeywordMap();
+    private static final HashMap<String, SimpleToken> keywords = createKeywordMap();
 
     private int line;
     private int position;
@@ -15,6 +15,9 @@ public class Lexer {
     private final String source;
 
     private boolean hadError = false;
+
+    // Illegal tokens right now are created on unknown chars, on invalid strings
+    // and on invalid numbers
     private final ArrayList<IllegalToken> errorList = new ArrayList<>();
 
     Lexer(String src) {
@@ -27,11 +30,12 @@ public class Lexer {
     }
 
     /*
-     * Every single case consumes a char (this is, the cursor is moved 1pos), either itself, or, the
-     * method that is being called to handle the case and then returns the proper Token.
+     * Every single case consumes a char (this is, the cursor is moved 1pos), either it does move
+     * the pointer, or, the method that is being called to handle the case moves it.
      *
      * For cases that are not ignored (i.e., non-whitespace), value is returned directly. For cases
-     * that are ignored, value is returned recursively.
+     * that are ignored, value is returned recursively (to not return null: A token is either a
+     * valid token or a IllegalToken).
      */
     public Token nextToken() {
         switch (this.currChar) {
@@ -117,20 +121,12 @@ public class Lexer {
 
             // Since they have to return something (not null), whitespace chars recursively return
             // the next valid token
-            case ' ' -> {
-                this.consumeChar();
-                return nextToken();
-            }
-            case '\t' -> {
+            case ' ', '\t', '\r' -> {
                 this.consumeChar();
                 return nextToken();
             }
             case '\n' -> {
                 this.line += 1;
-                this.consumeChar();
-                return nextToken();
-            }
-            case '\r' -> {
                 this.consumeChar();
                 return nextToken();
             }
@@ -154,7 +150,22 @@ public class Lexer {
         return t;
     }
 
-    public ArrayList<Token> readUntilNewlineOrEOF() {
+
+    public ArrayList<Token> readUntilEOF() {
+        ArrayList<Token> list = new ArrayList<>();
+
+        Token t = this.nextToken();
+
+        while (!isEOF(t)) {
+            list.add(t);
+            t = this.nextToken();
+        }
+        list.add(t);
+
+        return list;
+    }
+
+    public ArrayList<Token> readSequenceOfTokens() {
         ArrayList<Token> list = new ArrayList<>();
 
         int line = this.line;
@@ -164,9 +175,7 @@ public class Lexer {
             list.add(t);
             t = this.nextToken();
         }
-
-        list.add(t); // EOF
-
+        // No EOF -> This is used to read lines in the REPL
         return list;
     }
 
@@ -199,7 +208,8 @@ public class Lexer {
 
     private Token handleNumberToken() {
         Token t;
-        StringBuilder value = new StringBuilder(this.currChar);
+        StringBuilder value = new StringBuilder();
+        value.append(this.currChar);
         boolean isValid = true;
 
         while (this.currChar != ' ' && this.currChar != ';'
@@ -223,8 +233,8 @@ public class Lexer {
 
     private Token handleAlphaToken() {
         // Identifier case
-        StringBuilder identifier = new StringBuilder(this.currChar);
-        while (isAlphabetic(this.currChar) || this.currChar == '_') {
+        StringBuilder identifier = new StringBuilder();
+        while (isAlphabetic(this.currChar) || isDigit(this.currChar) || this.currChar == '_') {
             identifier.append(this.currChar);
             this.consumeChar();
         }

@@ -4,8 +4,8 @@ import org.example.TokenUtils.Token;
 import org.example.TokenUtils.TokenType;
 
 public class ValueToken implements Token {
-    private TokenType t;
-    private String value;
+    private final TokenType t;
+    private final String value;
 
     ValueToken(TokenType type, String value) {
         this.t = type;

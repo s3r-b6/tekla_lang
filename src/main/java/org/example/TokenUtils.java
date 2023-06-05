@@ -28,9 +28,9 @@ public class TokenUtils {
     }
 
     interface Token {
-        public TokenType getTokenType();
+        TokenType getTokenType();
 
-        public void print();
+        void print();
     }
 
     public static boolean tokenPartialEq(Token t1, Token t2) {

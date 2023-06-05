@@ -4,8 +4,7 @@ import static org.example.TokenUtils.tokenPartialEq;
 import static org.example.TokenUtils.tokenEq;
 import static org.example.TokenUtils.isEOF;
 import static org.example.TokenUtils.TokenType.*;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 
@@ -158,15 +157,8 @@ public class LexerTests {
         printTestInfo("parses more complex strings", src);
 
         Lexer lex = new Lexer(src);
-        Token t = lex.nextToken();
 
-
-        ArrayList<Token> tokens = new ArrayList<>();
-        tokens.add(t);
-        while (!isEOF(t)) {
-            t = lex.nextToken();
-            tokens.add(t);
-        }
+        ArrayList<Token> tokens = lex.readUntilEOF();
 
         TokenType[] expectedTypes = {Let, Identifier, Equal, Integer, Semicolon, Let, Identifier,
                 Equal, Function, LParen, Identifier, Comma, Identifier, RParen, LBrace, Identifier,
@@ -180,12 +172,10 @@ public class LexerTests {
             TokenType tokenType = tokens.get(i).getTokenType();
             TokenType expectedType = expectedTypes[i];
             String failMsg = "\n\s\s[FAIL: " + i + "] Type " + tokenType.toString()
-                    + " should match: " + expectedType.toString();
+                    + " should match: " + expectedType;
 
-            assertTrue(tokenType.equals(expectedType), failMsg);
+            assertEquals(tokenType, expectedType, failMsg);
         }
-
-        tokens.add(t);
     }
 
     @Test
@@ -220,7 +210,7 @@ public class LexerTests {
         }
 
         lex.printErrors();
-        assertTrue(errors.size() == 4);
+        assertEquals(4, errors.size());
     }
 
     @Test
@@ -231,7 +221,6 @@ public class LexerTests {
 
         ValueToken tok = (ValueToken) lex.nextToken();
         ValueToken tok2 = new ValueToken(String, "test");
-        assertTrue(tok instanceof ValueToken);
         assertTrue(tokenEq(tok, tok2));
     }
 
@@ -261,7 +250,7 @@ public class LexerTests {
             i += 1;
         }
 
-        assertTrue(i == 3); // There are 3 tokens (3 integers)
+        assertEquals(3, i); // There are 3 tokens (3 integers)
     }
 
     @Test
@@ -283,11 +272,11 @@ public class LexerTests {
         lex.printErrors();
     }
 
+    @Test
     public void testReadsUntilEOF() {
         Lexer lex = new Lexer("asfjlkqwjkl   =  let ");
 
         printTestInfo("reads EOF when pos >= length of src", "");
-
         Token t = lex.nextToken();
 
         int i = 0;
@@ -296,6 +285,6 @@ public class LexerTests {
             i += 1;
         }
 
-        assertTrue(i == 3); // There are 3 tokens: an ident, an equals and a let
+        assertEquals(3, i); // There are 3 tokens: an ident, an equals and a let
     }
 }
