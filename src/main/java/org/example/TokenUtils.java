@@ -71,6 +71,7 @@ public class TokenUtils {
         HashMap<String, SimpleToken> keywords = new HashMap<>();
         keywords.put("let", new SimpleToken(TokenType.Let));
         keywords.put("if", new SimpleToken(TokenType.If));
+        keywords.put("else", new SimpleToken(TokenType.Else));
         keywords.put("for", new SimpleToken(TokenType.For));
         keywords.put("func", new SimpleToken(TokenType.Function));
         keywords.put("while", new SimpleToken(TokenType.While));
