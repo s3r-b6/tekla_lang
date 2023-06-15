@@ -2,14 +2,9 @@ package org.example;
 
 import org.example.AbstractSyntaxTree.AstPrinter;
 import org.example.AbstractSyntaxTree.Expression;
-import org.example.AbstractSyntaxTree.Parser;
-import org.example.Lexer.Lexer;
 import org.example.Lexer.SimpleToken;
 import org.example.Lexer.TokenUtils;
-import org.example.Lexer.ValueToken;
 import org.junit.jupiter.api.Test;
-
-import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
