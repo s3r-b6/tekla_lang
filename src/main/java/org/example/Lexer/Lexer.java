@@ -1,7 +1,7 @@
-package org.example;
+package org.example.Lexer;
 
-import static org.example.TokenUtils.TokenType.*;
-import static org.example.TokenUtils.*;
+import static org.example.Lexer.TokenUtils.TokenType.*;
+import static org.example.Lexer.TokenUtils.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,7 +20,7 @@ public class Lexer {
     // and on invalid numbers
     private final ArrayList<IllegalToken> errorList = new ArrayList<>();
 
-    Lexer(String src) {
+    public Lexer(String src) {
         this.position = 0;
         this.currChar = '\0';
         this.line = 0;
@@ -193,13 +193,11 @@ public class Lexer {
         final String NO_COLOR = "\033[0m";
 
         if (!this.hadError) {
-            System.out.printf("\n[%sPARSING_ERRORS%s] No errors found while parsing\n", RED,
-                    NO_COLOR);
+            System.out.printf("\n[%sPARSING_ERRORS%s] No errors found while parsing\n", RED, NO_COLOR);
             return;
         }
 
-        System.err.printf("\n[%sPARSING_ERRORS%s] %d errors found while parsing the file:\n", RED,
-                NO_COLOR, errorList.size());
+        System.err.printf("\n[%sPARSING_ERRORS%s] %d errors found while parsing the file:\n", RED, NO_COLOR, errorList.size());
         for (int i = 0; i < errorList.size(); i++) {
             errorList.get(i).printIndexed(i + 1);
         }
@@ -208,15 +206,16 @@ public class Lexer {
 
     private Token handleNumberToken() {
         Token t;
-        StringBuilder value = new StringBuilder();
-        value.append(this.currChar);
         boolean isValid = true;
+        StringBuilder value = new StringBuilder();
 
-        while (this.currChar != ' ' && this.currChar != ';'
-                && this.position <= this.source.length()) {
-            if (!isDigit(this.currChar) && this.currChar != '\0') {
-                isValid = false;
-            }
+        value.append(this.currChar);
+        this.consumeChar();
+
+        while (this.currChar != ' ' && this.currChar != ';' && this.position <= this.source.length()) {
+
+            if (!isDigit(this.currChar)) isValid = false;
+
             value.append(this.currChar);
             this.consumeChar();
         }
@@ -253,8 +252,7 @@ public class Lexer {
         StringBuilder lit = new StringBuilder();
 
         // A string should only span 1 line and should always be terminated
-        while (this.currChar != '"' && this.currChar != '\n'
-                && this.position < this.source.length()) {
+        while (this.currChar != '"' && this.currChar != '\n' && this.position < this.source.length()) {
             lit.append(this.currChar);
             this.consumeChar();
         }

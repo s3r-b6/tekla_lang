@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import org.example.TokenUtils.Token;
+import org.example.Lexer.Lexer;
+import org.example.Lexer.SimpleToken;
+import org.example.Lexer.TokenUtils;
+import org.example.Lexer.TokenUtils.Token;
 
 public class Main {
     public static void main(String[] args) {
@@ -13,10 +16,9 @@ public class Main {
             System.out.println("Welcome to the Tekla REPL. Start inputting your commands.\nWrite EOF to end inputting commands\n\n");
             getTokensFromUserInput(tokens);
             if (tokens.size() < 3) {
-                System.out.println("[ERROR] Your input was too small.");
+                System.out.println("[ERROR] Yur input was too small.");
                 tokens.forEach(Token::print);
             }
-
 
         } else if (args.length == 1) { // Read from file
 

@@ -1,4 +1,4 @@
-package org.example;
+package org.example.Lexer;
 
 import java.util.HashMap;
 
@@ -19,7 +19,7 @@ public class TokenUtils {
         Greater, Less, Equal, Plus, Minus, Slash,
         Greater_Equal, Less_Equal, Equal_Equal,
         Plus_Equal, Minus_Equal, Slash_Equal,
-        Not_Equal,
+        Not_Equal, Nil,
 
         Comma, Semicolon,
 
@@ -27,7 +27,7 @@ public class TokenUtils {
         LBrace, RBrace,
     }
 
-    interface Token {
+    public interface Token {
         TokenType getTokenType();
 
         void print();
@@ -78,6 +78,7 @@ public class TokenUtils {
         keywords.put("return", new SimpleToken(TokenType.Return));
         keywords.put("true", new SimpleToken(TokenType.True));
         keywords.put("false", new SimpleToken(TokenType.False));
+        keywords.put("nil", new SimpleToken(TokenType.Nil));
         return keywords;
     }
 }

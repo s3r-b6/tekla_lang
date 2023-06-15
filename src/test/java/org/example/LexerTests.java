@@ -1,15 +1,19 @@
 package org.example;
 
-import static org.example.TokenUtils.tokenPartialEq;
-import static org.example.TokenUtils.tokenEq;
-import static org.example.TokenUtils.isEOF;
-import static org.example.TokenUtils.TokenType.*;
+import static org.example.Lexer.TokenUtils.tokenPartialEq;
+import static org.example.Lexer.TokenUtils.tokenEq;
+import static org.example.Lexer.TokenUtils.isEOF;
+import static org.example.Lexer.TokenUtils.TokenType.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 
-import org.example.TokenUtils.Token;
-import org.example.TokenUtils.TokenType;
+import org.example.Lexer.IllegalToken;
+import org.example.Lexer.Lexer;
+import org.example.Lexer.SimpleToken;
+import org.example.Lexer.TokenUtils.Token;
+import org.example.Lexer.TokenUtils.TokenType;
+import org.example.Lexer.ValueToken;
 import org.junit.jupiter.api.Test;
 
 public class LexerTests {

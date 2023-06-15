@@ -1,7 +1,7 @@
-package org.example;
+package org.example.Lexer;
 
-import org.example.TokenUtils.TokenType;
-import org.example.TokenUtils.Token;
+import org.example.Lexer.TokenUtils.TokenType;
+import org.example.Lexer.TokenUtils.Token;
 
 public class IllegalToken implements Token {
     TokenType t;

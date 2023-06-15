@@ -1,12 +1,12 @@
-package org.example;
+package org.example.Lexer;
 
-import org.example.TokenUtils.Token;
-import org.example.TokenUtils.TokenType;
+import org.example.Lexer.TokenUtils.Token;
+import org.example.Lexer.TokenUtils.TokenType;
 
 public class SimpleToken implements Token {
     private final TokenType t;
 
-    SimpleToken(TokenType t) {
+    public SimpleToken(TokenType t) {
         this.t = t;
     }
 

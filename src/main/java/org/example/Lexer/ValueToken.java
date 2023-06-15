@@ -1,13 +1,13 @@
-package org.example;
+package org.example.Lexer;
 
-import org.example.TokenUtils.Token;
-import org.example.TokenUtils.TokenType;
+import org.example.Lexer.TokenUtils.Token;
+import org.example.Lexer.TokenUtils.TokenType;
 
 public class ValueToken implements Token {
     private final TokenType t;
     private final String value;
 
-    ValueToken(TokenType type, String value) {
+    public ValueToken(TokenType type, String value) {
         this.t = type;
         this.value = value;
     }

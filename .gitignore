@@ -8,3 +8,5 @@ target
 /.idea/jarRepositories.xml
 /.idea/misc.xml
 /.idea/vcs.xml
+/.idea/modules.xml
+/tekla_lang.iml
