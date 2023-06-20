@@ -17,50 +17,52 @@ public class REPL {
     private static final Interpreter interpreter = new Interpreter();
 
     public static void main(String[] args) {
-        if (args.length == 0) { // Interactive prompt
-            System.out.println("Welcome to the Tekla REPL. Start inputting your commands.\nWrite EOF to end inputting commands\n\n");
-            List<Token> tokens = getTokensFromUserInput();
-
-            if (tokens.size() < 3) {
-                System.out.println("[ERROR] Your input was too small.");
-                tokens.forEach(Token::print);
-            } else {
-                Parser parser = new Parser(tokens);
-                Expression expr = parser.parse();
-
-                if (parser.hadErrors()) {
-                    parser.printErrors();
-                } else {
-                    System.out.println(new AstPrinter().print(expr));
-                    System.out.println(interpreter.interpret(expr));
-                }
-            }
-        } else if (args.length == 1) { // Read from file
+        // Interactive prompt
+        if (args.length == 0) interactivePrompt();
+        else if (args.length == 1) { // Read from file
 
         } else { // Bad usage
             throw new RuntimeException("Invalid args (use with no args or with a file)");
+        }
+
+    }
+
+    private static void interactivePrompt() {
+        System.out.println("Welcome to the Tekla REPL. Start inputting your commands.\nWrite EOF to end inputting commands\n\n");
+        while (true) {
+            List<Token> tokens = getTokensFromUserInput();
+
+            if (tokens == null) break;
+
+            tokens.forEach(Token::print);
+            if (tokens.size() <= 2) continue;
+
+            Parser parser = new Parser(tokens);
+            Expression expr = parser.parseNext();
+
+            if (parser.hadErrors()) {
+                parser.printErrors();
+            } else {
+                System.out.printf("[EXPRESSION]: %s %n\t[RESULT]: %s%n", new AstPrinter().print(expr), interpreter.interpret(expr));
+            }
         }
     }
 
     private static List<Token> getTokensFromUserInput() {
         List<Token> tokens = new ArrayList<>();
-        while (true) {
-            Scanner sc = new Scanner(System.in);
-            System.out.print(">>> ");
-            String line = sc.nextLine();
+        Scanner sc = new Scanner(System.in);
+        System.out.print(">>> ");
+        String line = sc.nextLine();
 
+        if (line.equals("exit")) return null;
 
-            Lexer lex = new Lexer(line.replace("exit;", ""));
-            List<Token> lineTokens = lex.readSequenceOfTokens();
+        Lexer lex = new Lexer(line);
+        List<Token> lineTokens = lex.readSequenceOfTokens();
 
-            if (lex.hadError()) {
-                lex.printErrors();
-            } else {
-                tokens.addAll(lineTokens);
-                lineTokens.forEach(Token::print); // DEBUG
-                if (line.endsWith("exit")) break;
-            }
-        }
+        if (lex.hadError()) lex.printErrors();
+        else tokens.addAll(lineTokens);
+
+        tokens.add(new SimpleToken(0, TokenUtils.TokenType.EOF));
         return tokens;
     }
 }

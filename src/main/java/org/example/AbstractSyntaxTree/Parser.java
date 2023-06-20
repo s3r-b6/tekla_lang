@@ -25,7 +25,7 @@ public class Parser {
 
 
         public void printError() {
-            System.out.printf("[ SYNTAX ERROR ]: %s ", message);
+            System.out.printf("[SYNTAX ERROR]: %s %n", message);
         }
     }
 
@@ -40,7 +40,7 @@ public class Parser {
         this.errors = new ArrayList<>();
     }
 
-    public Expression parse() {
+    public Expression parseNext() {
         try {
             return expression();
         } catch (ParseError err) {
@@ -49,7 +49,6 @@ public class Parser {
             return null;
         }
     }
-
 
     private Expression expression() throws ParseError {
         return equality();
@@ -126,7 +125,7 @@ public class Parser {
 
         if (match(TokenType.LParen)) {
             Expression expr = expression();
-            consume(TokenType.RParen, "Expect ')' after expression.");
+            consume(TokenType.RParen, "Expected ')' after expression.");
             return new Expression.GroupingExpression(expr);
         }
 

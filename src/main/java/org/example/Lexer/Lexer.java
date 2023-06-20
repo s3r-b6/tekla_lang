@@ -274,6 +274,7 @@ public class Lexer {
             return t;
         }
 
+        consumeChar();
         return new ValueToken<>(this.line, String, lit.toString());
     }
 

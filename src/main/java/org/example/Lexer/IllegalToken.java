@@ -34,11 +34,11 @@ public class IllegalToken implements Token {
     }
 
     public void print() {
-        System.err.printf("  [%sPARSING_ERROR%s] => %s \n", RED, NO_COLOR, this);
+        System.err.printf("  [%sLEXING_ERROR%s] => %s \n", RED, NO_COLOR, this);
     }
 
     public void printIndexed(int num) {
-        System.err.printf("  [%sPARSING_ERROR:%s %d] => %s \n", RED, NO_COLOR, num,
+        System.err.printf("  [%sLEXING_ERROR:%s %d] => %s \n", RED, NO_COLOR, num,
                 this);
     }
 

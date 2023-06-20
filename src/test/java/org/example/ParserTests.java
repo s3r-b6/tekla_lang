@@ -46,9 +46,15 @@ public class ParserTests {
                 "2 * 2 * 2 -4 *2",
                 "7 - 7 + 7 *1 -7",
                 "15 - 2 + 7 -1 *2",
+                "!true", "!false",
+                "\"test\" + \"test\"",
+                "!(!true)", "!(!false)"
         };
         String[] exp = new String[]{
-                "2.5", "0", "0", "18"
+                "2.5", "0", "0", "18",
+                "false", "true", "testtest",
+                "true", "false"
+
         };
 
         for (int i = 0; i < src.length; i++) {
@@ -57,7 +63,7 @@ public class ParserTests {
 
             Parser parser = new Parser(tokens);
 
-            Expression expr = parser.parse();
+            Expression expr = parser.parseNext();
             Interpreter interpreter = new Interpreter();
 
             assertEquals(exp[i], interpreter.interpret(expr));
@@ -79,7 +85,7 @@ public class ParserTests {
 
             Parser parser = new Parser(tokens);
 
-            Expression expr = parser.parse();
+            Expression expr = parser.parseNext();
             Interpreter interpreter = new Interpreter();
             interpreter.interpret(expr);
             assertTrue(interpreter.hadError());
