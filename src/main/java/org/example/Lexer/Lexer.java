@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Lexer {
-    private static final HashMap<String, SimpleToken> keywords = createKeywordMap();
+    private static final HashMap<String, TokenType> keywords = createKeywordMap();
 
     private int line;
     private int position;
@@ -41,74 +41,81 @@ public class Lexer {
         switch (this.currChar) {
             case '(' -> {
                 this.consumeChar();
-                return new SimpleToken(LParen);
+                return new SimpleToken(this.line, LParen);
             }
             case ')' -> {
                 this.consumeChar();
-                return new SimpleToken(RParen);
+                return new SimpleToken(this.line, RParen);
             }
             case '{' -> {
                 this.consumeChar();
-                return new SimpleToken(LBrace);
+                return new SimpleToken(this.line, LBrace);
             }
             case '}' -> {
                 this.consumeChar();
-                return new SimpleToken(RBrace);
+                return new SimpleToken(this.line, RBrace);
             }
             case ',' -> {
                 this.consumeChar();
-                return new SimpleToken(Comma);
+                return new SimpleToken(this.line, Comma);
             }
             case ';' -> {
                 this.consumeChar();
-                return new SimpleToken(Semicolon);
+                return new SimpleToken(this.line, Semicolon);
             }
             case 0 -> {
                 this.consumeChar();
-                return new SimpleToken(EOF);
+                return new SimpleToken(this.line, EOF);
             }
 
             case '<' -> {
                 if (nextMatches('=')) {
-                    return new SimpleToken(Less_Equal);
+                    return new SimpleToken(this.line, Less_Equal);
                 } else {
-                    return new SimpleToken(Less);
+                    return new SimpleToken(this.line, Less);
                 }
             }
             case '>' -> {
                 if (nextMatches('=')) {
-                    return new SimpleToken(Greater_Equal);
+                    return new SimpleToken(this.line, Greater_Equal);
                 } else {
-                    return new SimpleToken(Greater);
+                    return new SimpleToken(this.line, Greater);
                 }
             }
             case '!' -> {
                 if (nextMatches('=')) {
-                    return new SimpleToken(Not_Equal);
+                    return new SimpleToken(this.line, Not_Equal);
                 } else {
-                    return new SimpleToken(Bang);
+                    return new SimpleToken(this.line, Bang);
                 }
             }
             case '=' -> {
                 if (nextMatches('=')) {
-                    return new SimpleToken(Equal_Equal);
+                    return new SimpleToken(this.line, Equal_Equal);
                 } else {
 
-                    return new SimpleToken(Equal);
+                    return new SimpleToken(this.line, Equal);
                 }
             }
             case '+' -> {
                 if (nextMatches('=')) {
-                    return new SimpleToken(Plus_Equal);
+                    return new SimpleToken(this.line, Plus_Equal);
                 } else {
-                    return new SimpleToken(Plus);
+                    return new SimpleToken(this.line, Plus);
+                }
+            }
+            case '*' -> {
+                if (nextMatches('=')) {
+                    return new SimpleToken(this.line, Star_Equal);
+                } else {
+                    return new SimpleToken(this.line, Star);
                 }
             }
             case '-' -> {
                 if (nextMatches('=')) {
-                    return new SimpleToken(Minus_Equal);
+                    return new SimpleToken(this.line, Minus_Equal);
                 } else {
-                    return new SimpleToken(Minus);
+                    return new SimpleToken(this.line, Minus);
                 }
             }
 
@@ -212,7 +219,9 @@ public class Lexer {
         value.append(this.currChar);
         this.consumeChar();
 
-        while (this.currChar != ' ' && this.currChar != ';' && this.position <= this.source.length()) {
+        while (this.currChar != ' ' && this.currChar != '/' && this.currChar != '*'
+                && this.currChar != '-' && this.currChar != '+' && this.currChar != ';'
+                && this.position <= this.source.length()) {
 
             if (!isDigit(this.currChar)) isValid = false;
 
@@ -225,7 +234,7 @@ public class Lexer {
             errorList.add((IllegalToken) t);
             hadError = true;
         } else {
-            t = new ValueToken(Integer, value.toString());
+            t = new ValueToken<>(this.line, Integer, Double.parseDouble(value.toString()));
         }
         return t;
     }
@@ -240,10 +249,10 @@ public class Lexer {
 
         String identifierStr = identifier.toString();
         if (keywords.containsKey(identifierStr)) {
-            return keywords.get(identifierStr);
+            return new SimpleToken(this.line, keywords.get(identifierStr));
         }
         // We have something that could be a valid identifier
-        return new ValueToken(Identifier, identifier.toString());
+        return new ValueToken<>(this.line, Identifier, identifier.toString());
     }
 
     private Token handleString() {
@@ -265,7 +274,7 @@ public class Lexer {
             return t;
         }
 
-        return new ValueToken(String, lit.toString());
+        return new ValueToken<>(this.line, String, lit.toString());
     }
 
     private Token handleSlash() {
@@ -277,9 +286,9 @@ public class Lexer {
 
             return nextToken();
         } else if ('=' == this.currChar) {
-            return new SimpleToken(Slash_Equal);
+            return new SimpleToken(this.line, Slash_Equal);
         } else {
-            return new SimpleToken(Slash);
+            return new SimpleToken(this.line, Slash);
         }
     }
 

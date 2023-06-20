@@ -16,8 +16,8 @@ public class TokenUtils {
 
         True, False, Bang,
 
-        Greater, Less, Equal, Plus, Minus, Slash,
-        Greater_Equal, Less_Equal, Equal_Equal,
+        Greater, Less, Equal, Plus, Minus, Slash, Star,
+        Greater_Equal, Less_Equal, Equal_Equal, Star_Equal,
         Plus_Equal, Minus_Equal, Slash_Equal,
         Not_Equal, Nil,
 
@@ -29,6 +29,8 @@ public class TokenUtils {
 
     public interface Token {
         TokenType getTokenType();
+
+        int getPos();
 
         void print();
     }
@@ -67,18 +69,18 @@ public class TokenUtils {
         return (t instanceof SimpleToken && t.getTokenType() == TokenType.EOF);
     }
 
-    public static HashMap<String, SimpleToken> createKeywordMap() {
-        HashMap<String, SimpleToken> keywords = new HashMap<>();
-        keywords.put("let", new SimpleToken(TokenType.Let));
-        keywords.put("if", new SimpleToken(TokenType.If));
-        keywords.put("else", new SimpleToken(TokenType.Else));
-        keywords.put("for", new SimpleToken(TokenType.For));
-        keywords.put("func", new SimpleToken(TokenType.Function));
-        keywords.put("while", new SimpleToken(TokenType.While));
-        keywords.put("return", new SimpleToken(TokenType.Return));
-        keywords.put("true", new SimpleToken(TokenType.True));
-        keywords.put("false", new SimpleToken(TokenType.False));
-        keywords.put("nil", new SimpleToken(TokenType.Nil));
+    public static HashMap<String, TokenType> createKeywordMap() {
+        HashMap<String, TokenType> keywords = new HashMap<>();
+        keywords.put("let", TokenType.Let);
+        keywords.put("if", TokenType.If);
+        keywords.put("else", TokenType.Else);
+        keywords.put("for", TokenType.For);
+        keywords.put("func", TokenType.Function);
+        keywords.put("while", TokenType.While);
+        keywords.put("return", TokenType.Return);
+        keywords.put("true", TokenType.True);
+        keywords.put("false", TokenType.False);
+        keywords.put("nil", TokenType.Nil);
         return keywords;
     }
 }

@@ -37,14 +37,14 @@ public class LexerTests {
         printTestInfo("parses simple tokens", src);
 
         ArrayList<Token> expectedTokens = new ArrayList<>();
-        expectedTokens.add(new SimpleToken(LParen));
-        expectedTokens.add(new SimpleToken(RParen));
-        expectedTokens.add(new SimpleToken(LBrace));
-        expectedTokens.add(new SimpleToken(RBrace));
-        expectedTokens.add(new SimpleToken(Plus));
-        expectedTokens.add(new SimpleToken(Equal));
-        expectedTokens.add(new SimpleToken(Comma));
-        expectedTokens.add(new SimpleToken(Semicolon));
+        expectedTokens.add(new SimpleToken(0, LParen));
+        expectedTokens.add(new SimpleToken(0, RParen));
+        expectedTokens.add(new SimpleToken(0, LBrace));
+        expectedTokens.add(new SimpleToken(0, RBrace));
+        expectedTokens.add(new SimpleToken(0, Plus));
+        expectedTokens.add(new SimpleToken(0, Equal));
+        expectedTokens.add(new SimpleToken(0, Comma));
+        expectedTokens.add(new SimpleToken(0, Semicolon));
 
         for (Token expected : expectedTokens) {
             Token token = lex.nextToken();
@@ -62,14 +62,14 @@ public class LexerTests {
         printTestInfo("ignores comments", src);
 
         ArrayList<Token> expectedTokens = new ArrayList<>();
-        expectedTokens.add(new SimpleToken(LParen));
-        expectedTokens.add(new SimpleToken(RParen));
-        expectedTokens.add(new SimpleToken(LBrace));
-        expectedTokens.add(new SimpleToken(RBrace));
-        expectedTokens.add(new SimpleToken(Plus));
-        expectedTokens.add(new SimpleToken(Equal));
-        expectedTokens.add(new SimpleToken(Comma));
-        expectedTokens.add(new SimpleToken(Semicolon));
+        expectedTokens.add(new SimpleToken(0, LParen));
+        expectedTokens.add(new SimpleToken(0, RParen));
+        expectedTokens.add(new SimpleToken(0, LBrace));
+        expectedTokens.add(new SimpleToken(0, RBrace));
+        expectedTokens.add(new SimpleToken(0, Plus));
+        expectedTokens.add(new SimpleToken(0, Equal));
+        expectedTokens.add(new SimpleToken(0, Comma));
+        expectedTokens.add(new SimpleToken(0, Semicolon));
 
         for (Token expected : expectedTokens) {
             Token token = lex.nextToken();
@@ -87,14 +87,14 @@ public class LexerTests {
         printTestInfo("ignores whitespace", src);
 
         ArrayList<Token> expectedTokens = new ArrayList<>();
-        expectedTokens.add(new SimpleToken(LParen));
-        expectedTokens.add(new SimpleToken(RParen));
-        expectedTokens.add(new SimpleToken(LBrace));
-        expectedTokens.add(new SimpleToken(RBrace));
-        expectedTokens.add(new SimpleToken(Plus_Equal));
-        expectedTokens.add(new SimpleToken(Equal));
-        expectedTokens.add(new SimpleToken(Comma));
-        expectedTokens.add(new SimpleToken(Semicolon));
+        expectedTokens.add(new SimpleToken(0, LParen));
+        expectedTokens.add(new SimpleToken(0, RParen));
+        expectedTokens.add(new SimpleToken(0, LBrace));
+        expectedTokens.add(new SimpleToken(0, RBrace));
+        expectedTokens.add(new SimpleToken(0, Plus_Equal));
+        expectedTokens.add(new SimpleToken(0, Equal));
+        expectedTokens.add(new SimpleToken(0, Comma));
+        expectedTokens.add(new SimpleToken(0, Semicolon));
 
         for (Token expected : expectedTokens) {
             Token token = lex.nextToken();
@@ -112,10 +112,10 @@ public class LexerTests {
 
         Lexer lex = new Lexer(src);
         ArrayList<Token> expectedTokens = new ArrayList<>();
-        expectedTokens.add(new SimpleToken(Let));
-        expectedTokens.add(new SimpleToken(For));
-        expectedTokens.add(new SimpleToken(If));
-        expectedTokens.add(new ValueToken(Identifier, "aaaaaa_aaaa"));
+        expectedTokens.add(new SimpleToken(0, Let));
+        expectedTokens.add(new SimpleToken(0, For));
+        expectedTokens.add(new SimpleToken(0, If));
+        expectedTokens.add(new ValueToken(0, Identifier, "aaaaaa_aaaa"));
 
         for (Token expected : expectedTokens) {
             Token token = lex.nextToken();
@@ -167,8 +167,8 @@ public class LexerTests {
         TokenType[] expectedTypes = {Let, Identifier, Equal, Integer, Semicolon, Let, Identifier,
                 Equal, Function, LParen, Identifier, Comma, Identifier, RParen, LBrace, Identifier,
                 Plus, Identifier, Semicolon, RBrace, Semicolon, Let, Identifier, Equal, Identifier,
-                LParen, Identifier, Comma, Identifier, RParen, Semicolon, Bang, Minus, Slash,
-                Illegal, Integer, Semicolon, Integer, Less, Integer, Greater, Integer, Semicolon,
+                LParen, Identifier, Comma, Identifier, RParen, Semicolon, Bang, Minus, Slash, Star,
+                Integer, Semicolon, Integer, Less, Integer, Greater, Integer, Semicolon,
                 Illegal, EOF};
 
 
@@ -189,7 +189,7 @@ public class LexerTests {
 
         printTestInfo("partial comparation of tokens", "aaa");
 
-        ValueToken expected = new ValueToken(Identifier, "bbb");
+        ValueToken expected = new ValueToken(0, Identifier, "bbb");
 
         String expectedMsg = "Expected: '" + expected.getTokenType() + "'";
         String gotMsg = "Got: '" + token.getTokenType() + "'";
@@ -224,7 +224,7 @@ public class LexerTests {
         printTestInfo("handles a single String", "\"test\"");
 
         ValueToken tok = (ValueToken) lex.nextToken();
-        ValueToken tok2 = new ValueToken(String, "test");
+        ValueToken tok2 = new ValueToken(0, String, "test");
         assertTrue(tokenEq(tok, tok2));
     }
 
@@ -250,7 +250,7 @@ public class LexerTests {
         int i = 0;
         while (!isEOF(t)) {
             t = lex.nextToken();
-            tokenEq(t, new ValueToken(Integer, "1234"));
+            tokenEq(t, new ValueToken(0, Integer, "1234"));
             i += 1;
         }
 
@@ -270,8 +270,8 @@ public class LexerTests {
         }
 
         assertTrue(lex.nextToken() instanceof ValueToken);
-        assertTrue(tokenEq(lex.nextToken(), new SimpleToken(EOF)));
-        assertTrue(tokenEq(lex.nextToken(), new SimpleToken(EOF)));
+        assertTrue(tokenEq(lex.nextToken(), new SimpleToken(0, EOF)));
+        assertTrue(tokenEq(lex.nextToken(), new SimpleToken(0, EOF)));
 
         lex.printErrors();
     }

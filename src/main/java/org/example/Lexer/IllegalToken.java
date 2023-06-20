@@ -51,4 +51,9 @@ public class IllegalToken implements Token {
     public TokenType getTokenType() {
         return this.t;
     }
+
+    @Override
+    public int getPos() {
+        return this.line;
+    }
 }
