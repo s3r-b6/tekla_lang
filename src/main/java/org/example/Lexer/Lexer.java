@@ -221,7 +221,7 @@ public class Lexer {
 
         while (this.currChar != ' ' && this.currChar != '/' && this.currChar != '*'
                 && this.currChar != '-' && this.currChar != '+' && this.currChar != ';'
-                && this.position <= this.source.length()) {
+                && this.currChar != ')' && this.position <= this.source.length()) {
 
             if (!isDigit(this.currChar)) isValid = false;
 

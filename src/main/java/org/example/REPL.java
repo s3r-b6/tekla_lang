@@ -2,12 +2,10 @@ package org.example;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 
-import org.example.AbstractSyntaxTree.AstPrinter;
-import org.example.AbstractSyntaxTree.Expression;
-import org.example.AbstractSyntaxTree.Interpreter;
-import org.example.AbstractSyntaxTree.Parser;
+import org.example.AbstractSyntaxTree.*;
 import org.example.Lexer.Lexer;
 import org.example.Lexer.SimpleToken;
 import org.example.Lexer.TokenUtils;
@@ -17,7 +15,6 @@ public class REPL {
     private static final Interpreter interpreter = new Interpreter();
 
     public static void main(String[] args) {
-        // Interactive prompt
         if (args.length == 0) interactivePrompt();
         else if (args.length == 1) { // Read from file
 
@@ -33,18 +30,20 @@ public class REPL {
             List<Token> tokens = getTokensFromUserInput();
 
             if (tokens == null) break;
+            // DEBUG: tokens.forEach(Token::print);
 
-            tokens.forEach(Token::print);
-            if (tokens.size() <= 2) continue;
+            run(tokens);
+        }
+    }
 
-            Parser parser = new Parser(tokens);
-            Expression expr = parser.parseNext();
+    private static void run(List<Token> tokens) {
+        Parser parser = new Parser(tokens);
+        List<Statement> statements = parser.parse();
 
-            if (parser.hadErrors()) {
-                parser.printErrors();
-            } else {
-                System.out.printf("[EXPRESSION]: %s %n\t[RESULT]: %s%n", new AstPrinter().print(expr), interpreter.interpret(expr));
-            }
+        if (parser.hadErrors()) {
+            parser.printErrors();
+        } else {
+            interpreter.interpret(statements);
         }
     }
 

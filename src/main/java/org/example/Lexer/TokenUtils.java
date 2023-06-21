@@ -24,7 +24,7 @@ public class TokenUtils {
         Comma, Semicolon,
 
         LParen, RParen,
-        LBrace, RBrace,
+        LBrace, RBrace, Print,
     }
 
     public interface Token {
@@ -80,6 +80,7 @@ public class TokenUtils {
         keywords.put("return", TokenType.Return);
         keywords.put("true", TokenType.True);
         keywords.put("false", TokenType.False);
+        keywords.put("print", TokenType.Print);
         keywords.put("nil", TokenType.Nil);
         return keywords;
     }

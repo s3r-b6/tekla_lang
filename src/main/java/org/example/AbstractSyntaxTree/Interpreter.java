@@ -2,30 +2,50 @@ package org.example.AbstractSyntaxTree;
 
 import org.example.Lexer.TokenUtils;
 
-public class Interpreter implements ExpressionVisitor<Object> {
+import java.util.ArrayList;
+import java.util.List;
+
+public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor {
+
     static class RuntimeError extends RuntimeException {
+        final String RED = "\033[1;91m";
+        final String NO_COLOR = "\033[0m";
+
         final TokenUtils.Token token;
 
         RuntimeError(TokenUtils.Token token, String message) {
             super(message);
             this.token = token;
         }
-    }
 
-    private boolean hadError = false;
-
-    public String interpret(Expression expr) {
-        try {
-            Object value = evaluate(expr);
-            return stringify(value);
-        } catch (RuntimeError err) {
-            this.hadError = true;
-            return String.format("[ INTERPRETER ERROR ]: %s on line %d", err.getMessage(), err.token.getPos());
+        public void printError() {
+            System.out.printf("  [%sINTERPRETER ERROR%s]: %s on line %d", RED, NO_COLOR, super.getMessage(), this.token.getPos());
         }
     }
 
-    public boolean hadError() {
-        return this.hadError;
+    private boolean hadError = false;
+    private final List<RuntimeError> errorList = new ArrayList<>();
+
+    public void interpret(List<Statement> statements) {
+        try {
+            for (Statement st : statements) execute(st);
+        } catch (RuntimeError err) {
+            this.hadError = true;
+            this.errorList.add(err);
+        }
+    }
+
+    @Override
+    public Void visitExpressionStatement(Statement.ExpressionStatement statement) {
+        evaluate(statement.expr);
+        return null;
+    }
+
+    @Override
+    public Void visitPrintStatement(Statement.PrintStatement statement) {
+        Object val = evaluate(statement.expr);
+        System.out.println(stringify(val));
+        return null;
     }
 
     @Override
@@ -155,5 +175,13 @@ public class Interpreter implements ExpressionVisitor<Object> {
         }
 
         return object.toString();
+    }
+
+    private void execute(Statement st) {
+        st.accept(this);
+    }
+
+    public boolean hadError() {
+        return this.hadError;
     }
 }

@@ -19,13 +19,16 @@ public class Parser {
     private static class ParseError extends Throwable {
         private final String message;
 
+        final String RED = "\033[1;91m";
+        final String NO_COLOR = "\033[0m";
+
         ParseError(String message) {
             this.message = message;
         }
 
 
         public void printError() {
-            System.out.printf("[SYNTAX ERROR]: %s %n", message);
+            System.out.printf("  [%sSYNTAX ERROR%s]: %s %n", RED, NO_COLOR, message);
         }
     }
 
@@ -40,14 +43,38 @@ public class Parser {
         this.errors = new ArrayList<>();
     }
 
-    public Expression parseNext() {
-        try {
-            return expression();
-        } catch (ParseError err) {
-            errors.add(err);
-            hadErrors = true;
-            return null;
+    public List<Statement> parse() {
+        List<Statement> statements = new ArrayList<>();
+        while (!isAtEnd()) {
+            try {
+                statements.add(statement());
+            } catch (ParseError err) {
+                errors.add(err);
+                hadErrors = true;
+                return null;
+            }
         }
+        return statements;
+    }
+
+    private Statement statement() throws ParseError {
+        if (match(TokenType.Print)) return printStatement();
+        return expressionStatement();
+    }
+
+    private Statement printStatement() throws ParseError {
+        consume(TokenType.LParen, "Expected '(' after print statement)");
+        Expression expr = expression();
+        consume(TokenType.RParen, "Expected ')' after print statement)");
+        consume(TokenType.Semicolon, "Expected ';' after print statement)");
+
+        return new Statement.PrintStatement(expr);
+    }
+
+    private Statement expressionStatement() throws ParseError {
+        Expression expr = expression();
+        consume(TokenType.Semicolon, "Expected ';' after expression");
+        return new Statement.ExpressionStatement(expr);
     }
 
     private Expression expression() throws ParseError {
