@@ -25,7 +25,7 @@ public class REPL {
     }
 
     private static void interactivePrompt() {
-        System.out.println("Welcome to the Tekla REPL. Start inputting your commands.\nWrite EOF to end inputting commands\n\n");
+        System.out.println("Welcome to the Tekla REPL. Start inputting your commands.\nWrite exit to end inputting commands\n");
         while (true) {
             List<Token> tokens = getTokensFromUserInput();
 
@@ -43,7 +43,10 @@ public class REPL {
         if (parser.hadErrors()) {
             parser.printErrors();
         } else {
-            interpreter.interpret(statements);
+            if (statements.size() > 0) {
+                interpreter.interpret(statements);
+                if (interpreter.hadError()) interpreter.printErrors();
+            }
         }
     }
 

@@ -7,6 +7,18 @@ public class AstPrinter implements ExpressionVisitor<String> {
     }
 
     @Override
+    public String visitAssignExpression(Expression.AssignExpression assignExpr) {
+        //TODO:
+        return null;
+    }
+
+    @Override
+    public String visitVarExpression(Expression.VarExpression varExpr) {
+        //TODO:
+        return null;
+    }
+
+    @Override
     public String visitBinary(Expression.BinaryExpression binExpr) {
         return parenthesize(binExpr.operator.getTokenType().toString(), binExpr.left, binExpr.right);
     }

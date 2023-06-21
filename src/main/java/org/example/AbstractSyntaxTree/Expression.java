@@ -2,6 +2,7 @@ package org.example.AbstractSyntaxTree;
 
 
 import org.example.Lexer.TokenUtils;
+import org.example.Lexer.ValueToken;
 
 public abstract class Expression {
 
@@ -64,5 +65,34 @@ public abstract class Expression {
             return visitor.visitGrouping(this);
         }
 
+    }
+
+    public static class VarExpression extends Expression {
+        ValueToken<String> name;
+
+        public VarExpression(ValueToken<String> name) {
+            this.name = name;
+        }
+
+        @Override
+        public <R> R accept(ExpressionVisitor<R> visitor) {
+            return visitor.visitVarExpression(this);
+        }
+    }
+
+    public static class AssignExpression extends Expression {
+        ValueToken<String> name;
+        Expression value;
+
+        public AssignExpression(ValueToken<String> name, Expression value) {
+            this.name = name;
+            this.value = value;
+        }
+
+
+        @Override
+        public <R> R accept(ExpressionVisitor<R> visitor) {
+            return visitor.visitAssignExpression(this);
+        }
     }
 }

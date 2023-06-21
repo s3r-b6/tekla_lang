@@ -7,6 +7,8 @@ import java.util.List;
 
 public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor {
 
+    private final Environment env = new Environment();
+
     static class RuntimeError extends RuntimeException {
         final String RED = "\033[1;91m";
         final String NO_COLOR = "\033[0m";
@@ -19,19 +21,22 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor 
         }
 
         public void printError() {
-            System.out.printf("  [%sINTERPRETER ERROR%s]: %s on line %d", RED, NO_COLOR, super.getMessage(), this.token.getPos());
+            System.out.printf("  [%sINTERPRETER ERROR%s]: %s on line %d%n", RED, NO_COLOR, super.getMessage(), this.token.getPos());
         }
     }
 
     private boolean hadError = false;
-    private final List<RuntimeError> errorList = new ArrayList<>();
+    private final List<RuntimeError> errors = new ArrayList<>();
 
     public void interpret(List<Statement> statements) {
         try {
-            for (Statement st : statements) execute(st);
+            for (Statement st : statements) {
+                //DEBUG: System.out.println(st.toString());
+                execute(st);
+            }
         } catch (RuntimeError err) {
             this.hadError = true;
-            this.errorList.add(err);
+            this.errors.add(err);
         }
     }
 
@@ -46,6 +51,42 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor 
         Object val = evaluate(statement.expr);
         System.out.println(stringify(val));
         return null;
+    }
+
+    @Override
+    public Object visitVarStatement(Statement.VarStatement varStatement) {
+        Object value = null;
+        if (varStatement.initializer != null) {
+            value = evaluate(varStatement.initializer);
+        }
+
+        env.define(varStatement.name.getValue(), value);
+        return null;
+    }
+
+
+    @Override
+    public Void visitLetStatement(Statement.LetStatement letStatement) {
+        Object value = null;
+        if (letStatement.initializer != null) {
+            value = evaluate(letStatement.initializer);
+        }
+
+        env.define(letStatement.name.getValue(), value);
+        return null;
+    }
+
+
+    @Override
+    public Object visitAssignExpression(Expression.AssignExpression assignExpression) {
+        Object value = evaluate(assignExpression.value);
+        env.assign(assignExpression.name, value);
+        return value;
+    }
+
+    @Override
+    public Object visitVarExpression(Expression.VarExpression varExpr) {
+        return env.get(varExpr.name);
     }
 
     @Override
@@ -183,5 +224,9 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor 
 
     public boolean hadError() {
         return this.hadError;
+    }
+
+    public void printErrors() {
+        for (RuntimeError err : errors) err.printError();
     }
 }

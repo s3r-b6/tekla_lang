@@ -9,14 +9,10 @@ import java.util.List;
 
 
 /**
- * The parser recursively walks through the possible expressions. I.e., if an
- * equality is not found and returned, a call to comparison is returned.
- * If comparison does not find a comparison, then a call to term() is returned, and so on.
- * The precedence for expressions is like this:
- * -> equality -> comparison -> term -> factor -> unary -> primary
+ * This is a recursive descent parser
  */
 public class Parser {
-    private static class ParseError extends Throwable {
+    private static class ParseError extends RuntimeException {
         private final String message;
 
         final String RED = "\033[1;91m";
@@ -25,7 +21,6 @@ public class Parser {
         ParseError(String message) {
             this.message = message;
         }
-
 
         public void printError() {
             System.out.printf("  [%sSYNTAX ERROR%s]: %s %n", RED, NO_COLOR, message);
@@ -45,21 +40,39 @@ public class Parser {
 
     public List<Statement> parse() {
         List<Statement> statements = new ArrayList<>();
-        while (!isAtEnd()) {
-            try {
-                statements.add(statement());
-            } catch (ParseError err) {
-                errors.add(err);
-                hadErrors = true;
-                return null;
-            }
-        }
+
+        while (!isAtEnd()) statements.add(declaration());
+
         return statements;
+    }
+
+
+    private Statement declaration() {
+        try {
+            if (match(TokenType.Let)) return letStatement();
+            return statement();
+        } catch (ParseError err) {
+            errors.add(err);
+            hadErrors = true;
+            synchronize();
+            return null;
+        }
     }
 
     private Statement statement() throws ParseError {
         if (match(TokenType.Print)) return printStatement();
         return expressionStatement();
+    }
+
+    private Statement letStatement() throws ParseError {
+        //If it is an Identifier, it has to be a ValueToken. This is kind of ugly, but it should not fail ever?
+        ValueToken<String> name = (ValueToken<String>) consume(TokenType.Identifier, "Expected an identifier after Let statement.");
+
+        Expression initializer = null;
+        if (match(TokenType.Equal)) initializer = expression();
+
+        consume(TokenType.Semicolon, "Expected a ';' after the variable declaration");
+        return new Statement.LetStatement(name, initializer);
     }
 
     private Statement printStatement() throws ParseError {
@@ -78,9 +91,28 @@ public class Parser {
     }
 
     private Expression expression() throws ParseError {
-        return equality();
+        return assignment();
     }
 
+    private Expression assignment() throws ParseError {
+        Expression expr = equality();
+
+        if (match(TokenType.Equal)) {
+            TokenUtils.Token equals = previous();
+
+            //Recursively parse the right side of the expression
+            Expression val = assignment();
+
+            if (expr instanceof Expression.VarExpression) {
+                ValueToken<String> name = ((Expression.VarExpression) expr).name;
+                return new Expression.AssignExpression(name, val);
+            }
+
+            throw error(equals, "Invalid assignment target.");
+        }
+
+        return expr;
+    }
 
     private Expression equality() throws ParseError {
         Expression expr = comparison();
@@ -111,6 +143,7 @@ public class Parser {
 
         while (match(TokenType.Minus, TokenType.Plus)) {
             TokenUtils.Token op = previous();
+
             Expression right = factor();
             expr = new Expression.BinaryExpression(expr, op, right);
         }
@@ -150,6 +183,12 @@ public class Parser {
             return new Expression.LiteralExpression(tok.getValue());
         }
 
+        //If we get here, this *could* be an identifier
+        if (match(TokenType.Identifier)) {
+            ValueToken<String> tok = (ValueToken<String>) previous();
+            return new Expression.VarExpression(tok);
+        }
+
         if (match(TokenType.LParen)) {
             Expression expr = expression();
             consume(TokenType.RParen, "Expected ')' after expression.");
@@ -169,7 +208,7 @@ public class Parser {
             if (previous().getTokenType() == TokenType.Semicolon) return;
 
             switch (peek().getTokenType()) {
-                case Function, Let, For, If, While, Return -> {
+                case Function, Let, For, If, While, Return, Print -> {
                     return;
                 }
             }

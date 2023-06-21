@@ -1,9 +1,56 @@
 package org.example.AbstractSyntaxTree;
 
+import org.example.Lexer.ValueToken;
+
 public abstract class Statement {
 
-    abstract Void accept(StatementVisitor visitor);
+    public abstract Void accept(StatementVisitor visitor);
 
+    public abstract String toString();
+
+    static class LetStatement extends Statement {
+        ValueToken<String> name;
+        Expression initializer;
+
+        LetStatement(ValueToken<String> name, Expression init) {
+            this.name = name;
+            this.initializer = init;
+        }
+
+        @Override
+        public Void accept(StatementVisitor visitor) {
+            visitor.visitLetStatement(this);
+            return null;
+        }
+
+        @Override
+        public String toString() {
+            AstPrinter printer = new AstPrinter();
+            return String.format("Let statement: name: %s, initializer: %s", name.getValue(), printer.print(initializer));
+        }
+    }
+
+    static class VarStatement extends Statement {
+        ValueToken<String> name;
+        Expression initializer;
+
+        VarStatement(ValueToken<String> name, Expression initializer) {
+            this.name = name;
+            this.initializer = initializer;
+        }
+
+        @Override
+        public Void accept(StatementVisitor visitor) {
+            visitor.visitVarStatement(this);
+            return null;
+        }
+
+        @Override
+        public String toString() {
+            AstPrinter printer = new AstPrinter();
+            return String.format("Let statement: name: %s, initializer: %s", name.getValue(), printer.print(initializer));
+        }
+    }
 
     static class ExpressionStatement extends Statement {
         Expression expr;
@@ -15,6 +62,12 @@ public abstract class Statement {
         @Override
         public Void accept(StatementVisitor visitor) {
             return visitor.visitExpressionStatement(this);
+        }
+
+        @Override
+        public String toString() {
+            AstPrinter printer = new AstPrinter();
+            return String.format("Expression statement: expression: %s", printer.print(expr));
         }
     }
 
@@ -28,6 +81,12 @@ public abstract class Statement {
         @Override
         public Void accept(StatementVisitor visitor) {
             return visitor.visitPrintStatement(this);
+        }
+
+        @Override
+        public String toString() {
+            AstPrinter printer = new AstPrinter();
+            return String.format("Print statement: expression: %s", printer.print(expr));
         }
     }
 }
