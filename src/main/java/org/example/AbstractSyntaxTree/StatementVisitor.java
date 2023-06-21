@@ -5,7 +5,5 @@ public interface StatementVisitor {
 
     Void visitPrintStatement(Statement.PrintStatement statement);
 
-    Object visitVarStatement(Statement.VarStatement varStatement);
-
     Void visitLetStatement(Statement.LetStatement letStatement);
 }

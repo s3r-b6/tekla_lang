@@ -30,27 +30,6 @@ public abstract class Statement {
         }
     }
 
-    static class VarStatement extends Statement {
-        ValueToken<String> name;
-        Expression initializer;
-
-        VarStatement(ValueToken<String> name, Expression initializer) {
-            this.name = name;
-            this.initializer = initializer;
-        }
-
-        @Override
-        public Void accept(StatementVisitor visitor) {
-            visitor.visitVarStatement(this);
-            return null;
-        }
-
-        @Override
-        public String toString() {
-            AstPrinter printer = new AstPrinter();
-            return String.format("Let statement: name: %s, initializer: %s", name.getValue(), printer.print(initializer));
-        }
-    }
 
     static class ExpressionStatement extends Statement {
         Expression expr;

@@ -53,17 +53,6 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor 
         return null;
     }
 
-    @Override
-    public Object visitVarStatement(Statement.VarStatement varStatement) {
-        Object value = null;
-        if (varStatement.initializer != null) {
-            value = evaluate(varStatement.initializer);
-        }
-
-        env.define(varStatement.name.getValue(), value);
-        return null;
-    }
-
 
     @Override
     public Void visitLetStatement(Statement.LetStatement letStatement) {
