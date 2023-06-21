@@ -1,14 +1,13 @@
 package org.example;
 
-import org.example.AbstractSyntaxTree.AstPrinter;
-import org.example.AbstractSyntaxTree.Expression;
-import org.example.AbstractSyntaxTree.Interpreter;
-import org.example.AbstractSyntaxTree.Parser;
+import org.example.AbstractSyntaxTree.*;
 import org.example.Lexer.Lexer;
 import org.example.Lexer.SimpleToken;
 import org.example.Lexer.TokenUtils;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,13 +41,13 @@ public class ParserTests {
     @Test
     public void testInterpreter() {
         String[] src = new String[]{
-                "7 / 2 + 7 -4 *2",
-                "2 * 2 * 2 -4 *2",
-                "7 - 7 + 7 *1 -7",
-                "15 - 2 + 7 -1 *2",
-                "!true", "!false",
-                "\"test\" + \"test\"",
-                "!(!true)", "!(!false)"
+                "print(7 / 2 + 7 -4 *2);",
+                "print(2 * 2 * 2 -4 *2);",
+                "print(7 - 7 + 7 *1 -7);",
+                "print(15 - 2 + 7 -1 *2);",
+                "print(!true);", "print(!false);",
+                "print(\"test\" + \"test\");",
+                "print(!(!true));", "print(!(!false));"
         };
         String[] exp = new String[]{
                 "2.5", "0", "0", "18",
@@ -63,20 +62,23 @@ public class ParserTests {
 
             Parser parser = new Parser(tokens);
 
-            //Expression expr = parser.parse();
+            List<Statement> statements = parser.parse();
             Interpreter interpreter = new Interpreter();
+            ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+            System.setOut(new PrintStream(outContent));
 
-            //assertEquals(exp[i], interpreter.interpret(expr));
+            interpreter.interpret(statements);
+
+            assertEquals(exp[i], outContent.toString().replace("\n", ""));
         }
     }
 
 
     @Test
-    public void testError() {
+    public void testInvalidOperations() {
         String[] src = new String[]{
-                "7-/ 2 + 7 -4 *2",
-                "7---2 + 7 -4 *2",
-                "7-/ 2 7 let -4 *2",
+                "print(7-/ 2);",
+                "print(7-/ 2 7 -4 *2);",
         };
 
         for (String str : src) {
@@ -84,11 +86,40 @@ public class ParserTests {
             List<TokenUtils.Token> tokens = lex.readUntilEOF();
 
             Parser parser = new Parser(tokens);
-
-//            Expression expr = parser.parse();
+            List<Statement> statements = parser.parse();
+            assertTrue(parser.hadErrors());
             Interpreter interpreter = new Interpreter();
-            //           interpreter.interpret(expr);
-            assertTrue(interpreter.hadError());
+            //If it had errors, the interpreter should not run it, so naturally it throws
+            assertThrows(NullPointerException.class, () -> interpreter.interpret(statements));
+        }
+    }
+
+    @Test
+    public void testAssignments() {
+        String[] src = {
+                "let x = 5; print(x+5);",
+                "let x = 2; let x = 100; print(x);",
+                "let x = 3 + 4 + 2; print(x-1);"
+        };
+        String[] exp = {
+                "10",
+                "100",
+                "8"
+        };
+        for (int i = 0; i < src.length; i++) {
+            Lexer lex = new Lexer(src[i]);
+
+            List<TokenUtils.Token> tokens = lex.readUntilEOF();
+            Parser parser = new Parser(tokens);
+
+            List<Statement> statements = parser.parse();
+            Interpreter interpreter = new Interpreter();
+            ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+            System.setOut(new PrintStream(outContent));
+
+            interpreter.interpret(statements);
+
+            assertEquals(exp[i], outContent.toString().replace("\n", ""));
         }
     }
 }
