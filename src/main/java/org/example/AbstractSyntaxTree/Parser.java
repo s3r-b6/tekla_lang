@@ -13,25 +13,9 @@ import java.util.List;
  * This is a recursive descent parser
  */
 public class Parser {
-    private static class ParseError extends RuntimeException {
-        private final String message;
-
-        final String RED = "\033[1;91m";
-        final String NO_COLOR = "\033[0m";
-
-        ParseError(String message) {
-            this.message = message;
-        }
-
-        public void printError() {
-            System.out.printf("  [%sSYNTAX ERROR%s]: %s %n", RED, NO_COLOR, message);
-        }
-    }
-
     private final List<Token> tokens;
     private final List<ParseError> errors;
     private int current = 0;
-
     private boolean hadErrors = false;
 
     public Parser(List<Token> tokens) {
@@ -46,7 +30,6 @@ public class Parser {
 
         return statements;
     }
-
 
     private Statement declaration() {
         try {
@@ -298,7 +281,6 @@ public class Parser {
         return false;
     }
 
-
     private boolean check(TokenType type) {
         if (isAtEnd()) return false;
 
@@ -328,5 +310,19 @@ public class Parser {
 
     public void printErrors() {
         for (ParseError err : errors) err.printError();
+    }
+
+    private static class ParseError extends RuntimeException {
+        final String RED = "\033[1;91m";
+        final String NO_COLOR = "\033[0m";
+        private final String message;
+
+        ParseError(String message) {
+            this.message = message;
+        }
+
+        public void printError() {
+            System.out.printf("  [%sSYNTAX ERROR%s]: %s %n", RED, NO_COLOR, message);
+        }
     }
 }

@@ -3,36 +3,6 @@ package org.example.Lexer;
 import java.util.HashMap;
 
 public class TokenUtils {
-    public enum TokenType {
-        Illegal, EOF,
-
-        Let, Identifier, Function, Print,
-
-        Integer, String, True, False,
-
-        For, If, Else,
-        While, Return,
-        Bang,
-
-        And, Or, BitwiseAnd, BitwiseOr,
-
-        Greater, Less, Equal, Plus, Minus, Slash, Star,
-        Greater_Equal, Less_Equal, Equal_Equal, Star_Equal,
-        Plus_Equal, Minus_Equal, Slash_Equal,
-        Not_Equal, Nil,
-
-        Comma, Semicolon,
-        LParen, RParen, LBrace, RBrace,
-    }
-
-    public interface Token {
-        TokenType getTokenType();
-
-        int getPos();
-
-        void print();
-    }
-
     public static boolean tokenPartialEq(Token t1, Token t2) {
         return (t1.getTokenType() == t2.getTokenType());
     }
@@ -81,5 +51,35 @@ public class TokenUtils {
         keywords.put("print", TokenType.Print);
         keywords.put("nil", TokenType.Nil);
         return keywords;
+    }
+
+    public enum TokenType {
+        Illegal, EOF,
+
+        Let, Identifier, Function, Print,
+
+        Integer, String, True, False,
+
+        For, If, Else,
+        While, Return,
+        Bang,
+
+        And, Or, BitwiseAnd, BitwiseOr,
+
+        Greater, Less, Equal, Plus, Minus, Slash, Star,
+        Greater_Equal, Less_Equal, Equal_Equal, Star_Equal,
+        Plus_Equal, Minus_Equal, Slash_Equal,
+        Not_Equal, Nil,
+
+        Comma, Semicolon,
+        LParen, RParen, LBrace, RBrace,
+    }
+
+    public interface Token {
+        TokenType getTokenType();
+
+        int getPos();
+
+        void print();
     }
 }

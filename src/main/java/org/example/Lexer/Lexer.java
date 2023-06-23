@@ -8,17 +8,14 @@ import java.util.HashMap;
 
 public class Lexer {
     private static final HashMap<String, TokenType> keywords = createKeywordMap();
-
-    private int line;
-    private int position;
-    private char currChar;
     private final String source;
-
-    private boolean hadError = false;
-
     // Illegal tokens right now are created on unknown chars, on invalid strings
     // and on invalid numbers
     private final ArrayList<IllegalToken> errorList = new ArrayList<>();
+    private int line;
+    private int position;
+    private char currChar;
+    private boolean hadError = false;
 
     public Lexer(String src) {
         this.position = 0;

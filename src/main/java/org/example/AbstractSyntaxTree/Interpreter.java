@@ -7,26 +7,9 @@ import java.util.List;
 
 public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor {
 
-    private Environment env = new Environment();
-
-    static class RuntimeError extends RuntimeException {
-        final String RED = "\033[1;91m";
-        final String NO_COLOR = "\033[0m";
-
-        final TokenUtils.Token token;
-
-        RuntimeError(TokenUtils.Token token, String message) {
-            super(message);
-            this.token = token;
-        }
-
-        public void printError() {
-            System.out.printf("  [%sINTERPRETER ERROR%s]: %s on line %d%n", RED, NO_COLOR, super.getMessage(), this.token.getPos());
-        }
-    }
-
-    private boolean hadError = false;
     private final List<RuntimeError> errors = new ArrayList<>();
+    private Environment env = new Environment();
+    private boolean hadError = false;
 
     public void interpret(List<Statement> statements) {
         //If only an expression is inputted, evaluate it and print it as if it were inside a print st
@@ -68,7 +51,6 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor 
         return null;
     }
 
-
     @Override
     public Void visitLetStatement(Statement.LetStatement letStatement) {
         Object value = null;
@@ -79,7 +61,6 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor 
         env.define(letStatement.name.getValue(), value);
         return null;
     }
-
 
     @Override
     public Void visitBlockStatement(Statement.BlockStatement blockStatement) {
@@ -95,6 +76,12 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor 
             execute(ifStatement.elseBranch);
         }
 
+        return null;
+    }
+
+    @Override
+    public Void visitWhileStatement(Statement.WhileStatement whileStatement) {
+        //TODO:
         return null;
     }
 
@@ -163,7 +150,7 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor 
                 }
 
                 if (left instanceof String && right instanceof String) {
-                    return (String) left + (String) right;
+                    return left + (String) right;
                 }
 
                 throw new RuntimeError(binExpr.operator, "Operands must be two numbers or two strings.");
@@ -231,7 +218,6 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor 
         return expr.accept(this);
     }
 
-
     private boolean isTruthy(Object object) {
         if (object == null) return false;
         if (object instanceof Boolean) return (boolean) object;
@@ -278,5 +264,21 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor 
 
     public void printErrors() {
         for (RuntimeError err : errors) err.printError();
+    }
+
+    static class RuntimeError extends RuntimeException {
+        final String RED = "\033[1;91m";
+        final String NO_COLOR = "\033[0m";
+
+        final TokenUtils.Token token;
+
+        RuntimeError(TokenUtils.Token token, String message) {
+            super(message);
+            this.token = token;
+        }
+
+        public void printError() {
+            System.out.printf("  [%sINTERPRETER ERROR%s]: %s on line %d%n", RED, NO_COLOR, super.getMessage(), this.token.getPos());
+        }
     }
 }

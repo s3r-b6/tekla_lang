@@ -10,4 +10,6 @@ public interface StatementVisitor {
     Void visitBlockStatement(Statement.BlockStatement blockStatement);
 
     Void visitIfStatement(Statement.IfStatement ifStatement);
+
+    Void visitWhileStatement(Statement.WhileStatement whileStatement);
 }

@@ -4,13 +4,12 @@ import org.example.Lexer.TokenUtils.TokenType;
 import org.example.Lexer.TokenUtils.Token;
 
 public class IllegalToken implements Token {
+    final String RED = "\033[1;91m";
+    final String NO_COLOR = "\033[0m";
     TokenType t;
     String value;
     String desc;
     int line;
-
-    final String RED = "\033[1;91m";
-    final String NO_COLOR = "\033[0m";
 
     public IllegalToken(String desc, String value, int line) {
         this.t = TokenType.Illegal;

@@ -134,4 +134,26 @@ public abstract class Statement {
             return blockString.toString();
         }
     }
+
+    static class WhileStatement extends Statement {
+        Expression expr;
+        Statement body;
+
+        WhileStatement(Expression expr, Statement body) {
+            this.expr = expr;
+            this.body = body;
+        }
+
+        @Override
+        public Void accept(StatementVisitor visitor) {
+            visitor.visitWhileStatement(this);
+            return null;
+        }
+
+        @Override
+        public String toString() {
+            AstPrinter printer = new AstPrinter();
+            return String.format("While statement: condition: %s body: %s", printer.print(expr), body.toString());
+        }
+    }
 }
