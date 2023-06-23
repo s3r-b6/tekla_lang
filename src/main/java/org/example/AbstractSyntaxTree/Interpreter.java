@@ -29,6 +29,12 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor 
     private final List<RuntimeError> errors = new ArrayList<>();
 
     public void interpret(List<Statement> statements) {
+        //If only an expression is inputted, evaluate it and print it as if it were inside a print st
+        if (statements.size() == 1 && statements.get(0) instanceof Statement.ExpressionStatement) {
+            Object val = evaluate(((Statement.ExpressionStatement) statements.get(0)).expr);
+            System.out.println(stringify(val));
+            return;
+        }
         try {
             for (Statement st : statements) {
                 //DEBUG: System.out.println(st.toString());

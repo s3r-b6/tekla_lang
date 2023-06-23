@@ -129,6 +129,10 @@ public class ParserTests {
                 let a = 2;
                 {
                     let a = 3;
+                    {
+                        let a = 4;
+                        print(a);
+                    }
                     print(a);
                 }
                 print(a);
@@ -143,6 +147,6 @@ public class ParserTests {
 
         interpreter.interpret(parser.parse());
 
-        assertEquals("3\n2\n", outContent.toString());
+        assertEquals("4\n3\n2\n", outContent.toString());
     }
 }
