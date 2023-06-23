@@ -30,7 +30,7 @@ public class REPL {
             List<Token> tokens = getTokensFromUserInput();
 
             if (tokens == null) break;
-            // DEBUG: tokens.forEach(Token::print);
+            //DEBUG: tokens.forEach(Token::print);
 
             run(tokens);
         }
@@ -44,6 +44,7 @@ public class REPL {
             parser.printErrors();
         } else {
             if (statements.size() > 0) {
+                interpreter.print(statements);
                 interpreter.interpret(statements);
                 if (interpreter.hadError()) interpreter.printErrors();
             }

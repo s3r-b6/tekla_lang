@@ -102,9 +102,9 @@ public class ParserTests {
                 "let x = 3 + 4 + 2; print(x-1);"
         };
         String[] exp = {
-                "10",
-                "100",
-                "8"
+                "10\n",
+                "100\n",
+                "8\n"
         };
         for (int i = 0; i < src.length; i++) {
             Lexer lex = new Lexer(src[i]);
@@ -119,7 +119,30 @@ public class ParserTests {
 
             interpreter.interpret(statements);
 
-            assertEquals(exp[i], outContent.toString().replace("\n", ""));
+            assertEquals(exp[i], outContent.toString());
         }
+    }
+
+    @Test
+    public void testBlocks() {
+        String src = """
+                let a = 2;
+                {
+                    let a = 3;
+                    print(a);
+                }
+                print(a);
+                """;
+
+        Lexer lex = new Lexer(src);
+        Parser parser = new Parser(lex.readUntilEOF());
+        Interpreter interpreter = new Interpreter();
+
+        ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outContent));
+
+        interpreter.interpret(parser.parse());
+
+        assertEquals("3\n2\n", outContent.toString());
     }
 }

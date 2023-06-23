@@ -2,6 +2,10 @@ package org.example.AbstractSyntaxTree;
 
 import org.example.Lexer.ValueToken;
 
+import java.sql.Array;
+import java.util.ArrayList;
+import java.util.List;
+
 public abstract class Statement {
 
     public abstract Void accept(StatementVisitor visitor);
@@ -66,6 +70,29 @@ public abstract class Statement {
         public String toString() {
             AstPrinter printer = new AstPrinter();
             return String.format("Print statement: expression: %s", printer.print(expr));
+        }
+    }
+
+    static class BlockStatement extends Statement {
+        List<Statement> statementList;
+
+        public BlockStatement(List<Statement> statements) {
+            this.statementList = statements;
+        }
+
+        @Override
+        public Void accept(StatementVisitor visitor) {
+            return visitor.visitBlockStatement(this);
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder blockString = new StringBuilder();
+            blockString.append("Block statement: ");
+
+            for (Statement st : statementList) blockString.append("\n").append(st.toString());
+
+            return blockString.toString();
         }
     }
 }

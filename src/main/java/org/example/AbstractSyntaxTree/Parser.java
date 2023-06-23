@@ -61,6 +61,7 @@ public class Parser {
 
     private Statement statement() throws ParseError {
         if (match(TokenType.Print)) return printStatement();
+        if (match(TokenType.LBrace)) return new Statement.BlockStatement(blockStatement());
         return expressionStatement();
     }
 
@@ -82,6 +83,17 @@ public class Parser {
         consume(TokenType.Semicolon, "Expected ';' after print statement)");
 
         return new Statement.PrintStatement(expr);
+    }
+
+    private ArrayList<Statement> blockStatement() throws ParseError {
+        ArrayList<Statement> statements = new ArrayList<>();
+
+        while (!check(TokenType.RBrace) && !isAtEnd()) {
+            statements.add(declaration()); //traverse the parser
+        }
+
+        consume(TokenType.RBrace, "Expected '}' at the end of the block");
+        return statements;
     }
 
     private Statement expressionStatement() throws ParseError {

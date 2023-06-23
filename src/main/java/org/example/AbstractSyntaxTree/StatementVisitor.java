@@ -6,4 +6,6 @@ public interface StatementVisitor {
     Void visitPrintStatement(Statement.PrintStatement statement);
 
     Void visitLetStatement(Statement.LetStatement letStatement);
+
+    Void visitBlockStatement(Statement.BlockStatement blockStatement);
 }

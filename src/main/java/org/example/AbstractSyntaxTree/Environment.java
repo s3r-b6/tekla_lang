@@ -7,7 +7,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Environment {
-    private final Map<String, Object> values = new HashMap<>();
+    final Environment enclosing;
+    private final Map<String, Object> values;
+
+
+    Environment() {
+        values = new HashMap<>();
+        enclosing = null;
+    }
+
+    Environment(Environment enclosing) {
+        values = new HashMap<>();
+        this.enclosing = enclosing;
+    }
 
     public void define(String name, Object value) {
         values.put(name, value);
@@ -19,8 +31,11 @@ public class Environment {
             return values.get(identifier);
         }
 
-        throw new Interpreter.RuntimeError(name,
-                "Undefined variable '" + identifier + "'.");
+        if (enclosing != null) {
+            return enclosing.get(name);
+        }
+
+        throw new Interpreter.RuntimeError(name, "Undefined variable '" + identifier + "'.");
     }
 
     public void assign(ValueToken<String> name, Object value) {

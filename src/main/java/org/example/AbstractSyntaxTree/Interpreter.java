@@ -7,7 +7,7 @@ import java.util.List;
 
 public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor {
 
-    private final Environment env = new Environment();
+    private Environment env = new Environment();
 
     static class RuntimeError extends RuntimeException {
         final String RED = "\033[1;91m";
@@ -40,6 +40,15 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor 
         }
     }
 
+    public void print(List<Statement> statements) {
+        try {
+            for (Statement st : statements) System.out.println(st.toString());
+        } catch (RuntimeError err) {
+            this.hadError = true;
+            this.errors.add(err);
+        }
+    }
+
     @Override
     public Void visitExpressionStatement(Statement.ExpressionStatement statement) {
         evaluate(statement.expr);
@@ -65,6 +74,24 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor 
         return null;
     }
 
+
+    @Override
+    public Void visitBlockStatement(Statement.BlockStatement blockStatement) {
+        executeBlock(blockStatement.statementList, new Environment(env));
+        return null;
+    }
+
+    private void executeBlock(List<Statement> statementList, Environment environment) {
+        Environment prevEnv = this.env;
+
+        try {
+            this.env = environment;
+
+            for (Statement st : statementList) execute(st);
+        } finally {
+            this.env = prevEnv;
+        }
+    }
 
     @Override
     public Object visitAssignExpression(Expression.AssignExpression assignExpression) {
