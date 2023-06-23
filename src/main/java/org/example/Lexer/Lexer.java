@@ -143,6 +143,8 @@ public class Lexer {
                     return handleAlphaToken();
                 } else if (isDigit(this.currChar)) {
                     return handleNumberToken();
+                } else if (this.currChar == '&' || this.currChar == '|') {
+                    return handleAmperAndSlash();
                 }
             }
         }
@@ -219,9 +221,11 @@ public class Lexer {
         value.append(this.currChar);
         this.consumeChar();
 
+        //This skips the chars that could be right after a number
         while (this.currChar != ' ' && this.currChar != '/' && this.currChar != '*'
                 && this.currChar != '-' && this.currChar != '+' && this.currChar != ';'
-                && this.currChar != ')' && this.position <= this.source.length()) {
+                && this.currChar != ')' && this.currChar != '|' && this.currChar != '&'
+                && this.position <= this.source.length()) {
 
             if (!isDigit(this.currChar)) isValid = false;
 
@@ -302,5 +306,26 @@ public class Lexer {
         }
 
         this.position += 1;
+    }
+
+    private Token handleAmperAndSlash() {
+        char prev = this.currChar;
+        this.consumeChar();
+
+        if (prev == '&') {
+            if (this.currChar == prev) {
+                this.consumeChar();
+                return new SimpleToken(this.line, And);
+            } else {
+                return new SimpleToken(this.line, BitwiseAnd);
+            }
+        } else {
+            if (this.currChar == prev) {
+                this.consumeChar();
+                return new SimpleToken(this.line, Or);
+            } else {
+                return new SimpleToken(this.line, BitwiseOr);
+            }
+        }
     }
 }

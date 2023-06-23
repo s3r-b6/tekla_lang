@@ -6,15 +6,15 @@ public class TokenUtils {
     public enum TokenType {
         Illegal, EOF,
 
-        Identifier,
+        Let, Identifier, Function, Print,
 
-        Integer, String,
+        Integer, String, True, False,
 
         For, If, Else,
         While, Return,
-        Function, Let,
+        Bang,
 
-        True, False, Bang,
+        And, Or, BitwiseAnd, BitwiseOr,
 
         Greater, Less, Equal, Plus, Minus, Slash, Star,
         Greater_Equal, Less_Equal, Equal_Equal, Star_Equal,
@@ -22,9 +22,7 @@ public class TokenUtils {
         Not_Equal, Nil,
 
         Comma, Semicolon,
-
-        LParen, RParen,
-        LBrace, RBrace, Print,
+        LParen, RParen, LBrace, RBrace,
     }
 
     public interface Token {

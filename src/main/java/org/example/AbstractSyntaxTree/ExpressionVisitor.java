@@ -13,4 +13,5 @@ public interface ExpressionVisitor<R> {
 
     R visitLiteral(Expression.LiteralExpression litExpr);
 
+    R visitLogicalExpression(Expression.LogicalExpression logicExp);
 }

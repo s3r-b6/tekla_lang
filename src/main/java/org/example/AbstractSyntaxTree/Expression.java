@@ -1,6 +1,7 @@
 package org.example.AbstractSyntaxTree;
 
 
+import org.example.Lexer.SimpleToken;
 import org.example.Lexer.TokenUtils;
 import org.example.Lexer.ValueToken;
 
@@ -38,12 +39,12 @@ public abstract class Expression {
 
     public static class BinaryExpression extends Expression {
         final Expression left;
-        final TokenUtils.Token operator;
+        final SimpleToken operator;
         final Expression right;
 
         public BinaryExpression(Expression left, TokenUtils.Token operator, Expression right) {
             this.left = left;
-            this.operator = operator;
+            this.operator = (SimpleToken) operator;
             this.right = right;
         }
 
@@ -93,6 +94,23 @@ public abstract class Expression {
         @Override
         public <R> R accept(ExpressionVisitor<R> visitor) {
             return visitor.visitAssignExpression(this);
+        }
+    }
+
+    public static class LogicalExpression extends Expression {
+        Expression left;
+        SimpleToken operator;
+        Expression right;
+
+        public LogicalExpression(Expression left, TokenUtils.Token operator, Expression right) {
+            this.left = left;
+            this.operator = (SimpleToken) operator;
+            this.right = right;
+        }
+
+        @Override
+        public <R> R accept(ExpressionVisitor<R> visitor) {
+            return visitor.visitLogicalExpression(this);
         }
     }
 }

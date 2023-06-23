@@ -87,6 +87,17 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor 
         return null;
     }
 
+    @Override
+    public Void visitIfStatement(Statement.IfStatement ifStatement) {
+        if (isTruthy(evaluate(ifStatement.condit))) {
+            execute(ifStatement.thenBranch);
+        } else if (ifStatement.elseBranch != null) {
+            execute(ifStatement.elseBranch);
+        }
+
+        return null;
+    }
+
     private void executeBlock(List<Statement> statementList, Environment environment) {
         Environment prevEnv = this.env;
 
@@ -104,6 +115,23 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor 
         Object value = evaluate(assignExpression.value);
         env.assign(assignExpression.name, value);
         return value;
+    }
+
+    @Override
+    public Object visitLogicalExpression(Expression.LogicalExpression logicExpr) {
+        Object left = evaluate(logicExpr.left);
+
+        //This could be done so that print(false || 2) printed 2 and not true,
+        //but I don't really like that (a logical expression, when evaluated,
+        //returns always true or false)
+        if (logicExpr.operator.getTokenType() == TokenUtils.TokenType.Or) {
+            if (isTruthy(left)) return true;
+        } else {
+            if (!isTruthy(left)) return false;
+        }
+
+        Object right = evaluate(logicExpr.right);
+        return isTruthy(right);
     }
 
     @Override

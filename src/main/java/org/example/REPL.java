@@ -44,7 +44,7 @@ public class REPL {
             parser.printErrors();
         } else {
             if (statements.size() > 0) {
-                interpreter.print(statements);
+                //interpreter.print(statements);
                 interpreter.interpret(statements);
                 if (interpreter.hadError()) interpreter.printErrors();
             }

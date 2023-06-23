@@ -149,4 +149,88 @@ public class ParserTests {
 
         assertEquals("4\n3\n2\n", outContent.toString());
     }
+
+    @Test
+    public void testConditionalOr() {
+        String[] src = {
+                "print(false || 2);",
+                "print(!false || 2);",
+                "print(true || 2);",
+                "print(!true|| 2);",
+                "if(!false || false) { print(true); } else { print(false); }",
+                "if(false || true) { print(true); } else { print(false); }",
+                "if(false || !true) { print(true); } else { print(false); }",
+                "if(!(!false) || !true) { print(true); } else { print(false); }",
+        };
+
+        String[] exp = {
+                "true\n",
+                "true\n",
+                "true\n",
+                "true\n",
+                "true\n",
+                "true\n",
+                "false\n",
+                "false\n"
+        };
+
+        for (int i = 0; i < src.length; i++) {
+            Lexer lex = new Lexer(src[i]);
+
+            List<TokenUtils.Token> tokens = lex.readUntilEOF();
+            Parser parser = new Parser(tokens);
+
+            List<Statement> statements = parser.parse();
+            Interpreter interpreter = new Interpreter();
+            ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+            System.setOut(new PrintStream(outContent));
+
+            interpreter.interpret(statements);
+
+            assertEquals(exp[i], outContent.toString());
+        }
+    }
+
+    @Test
+    public void testConditionalAnd() {
+        String[] src = {
+                "print(false && 2);",
+                "print(!false && 2);",
+                "print(true && 2);",
+                "print(!true && 2);",
+                "if(!false && true) { print(true); } else { print(false); }",
+                "if(false && true) { print(true); } else { print(false); }",
+                "if(!(!true) && !false) { print(true); } else { print(false); }",
+                "if((true) && !false) { print(true); } else { print(false); }",
+                "if(true) { print(2); } "
+        };
+
+        String[] exp = {
+                "false\n",
+                "true\n",
+                "true\n",
+                "false\n",
+                "true\n",
+                "false\n",
+                "true\n",
+                "true\n",
+                "2\n",
+        };
+
+        for (int i = 0; i < src.length; i++) {
+            Lexer lex = new Lexer(src[i]);
+
+            List<TokenUtils.Token> tokens = lex.readUntilEOF();
+            Parser parser = new Parser(tokens);
+
+            List<Statement> statements = parser.parse();
+            Interpreter interpreter = new Interpreter();
+            ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+            System.setOut(new PrintStream(outContent));
+
+            interpreter.interpret(statements);
+
+            assertEquals(exp[i], outContent.toString());
+        }
+    }
 }

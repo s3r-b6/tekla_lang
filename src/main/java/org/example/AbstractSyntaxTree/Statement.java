@@ -95,4 +95,43 @@ public abstract class Statement {
             return blockString.toString();
         }
     }
+
+    static class IfStatement extends Statement {
+        Expression condit;
+        Statement thenBranch;
+        Statement elseBranch;
+
+        IfStatement(Expression condit, Statement thenBranch) {
+            this.condit = condit;
+            this.thenBranch = thenBranch;
+            this.elseBranch = null;
+        }
+
+        IfStatement(Expression condit, Statement thenBranch, Statement elseBranch) {
+            this.condit = condit;
+            this.thenBranch = thenBranch;
+            this.elseBranch = elseBranch;
+        }
+
+
+        @Override
+        public Void accept(StatementVisitor visitor) {
+            return visitor.visitIfStatement(this);
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder blockString = new StringBuilder();
+            blockString.append("If statement: ");
+
+            blockString.append("\n").append(this.condit);
+            blockString.append("\n").append(this.thenBranch);
+
+            if (elseBranch != null) {
+                blockString.append("\n").append(this.elseBranch);
+            }
+
+            return blockString.toString();
+        }
+    }
 }

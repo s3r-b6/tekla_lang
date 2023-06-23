@@ -8,4 +8,6 @@ public interface StatementVisitor {
     Void visitLetStatement(Statement.LetStatement letStatement);
 
     Void visitBlockStatement(Statement.BlockStatement blockStatement);
+
+    Void visitIfStatement(Statement.IfStatement ifStatement);
 }

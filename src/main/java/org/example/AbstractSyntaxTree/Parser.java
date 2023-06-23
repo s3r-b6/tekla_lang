@@ -1,6 +1,7 @@
 package org.example.AbstractSyntaxTree;
 
 import org.example.Lexer.TokenUtils;
+import org.example.Lexer.TokenUtils.Token;
 import org.example.Lexer.TokenUtils.TokenType;
 import org.example.Lexer.ValueToken;
 
@@ -27,13 +28,13 @@ public class Parser {
         }
     }
 
-    private final List<TokenUtils.Token> tokens;
+    private final List<Token> tokens;
     private final List<ParseError> errors;
     private int current = 0;
 
     private boolean hadErrors = false;
 
-    public Parser(List<TokenUtils.Token> tokens) {
+    public Parser(List<Token> tokens) {
         this.tokens = tokens;
         this.errors = new ArrayList<>();
     }
@@ -62,6 +63,7 @@ public class Parser {
     private Statement statement() throws ParseError {
         if (match(TokenType.Print)) return printStatement();
         if (match(TokenType.LBrace)) return new Statement.BlockStatement(blockStatement());
+        if (match(TokenType.If)) return ifStatement();
         return expressionStatement();
     }
 
@@ -96,6 +98,24 @@ public class Parser {
         return statements;
     }
 
+    private Statement ifStatement() {
+        consume(TokenType.LParen, "Expected '(' after 'if' expression");
+        Expression expr = expression();
+        consume(TokenType.RParen, "Expected ')' at the end of 'if' statement");
+
+        consume(TokenType.LBrace, "Expected '{' at the start of then clause");
+        Statement thenBranch = statement();
+        consume(TokenType.RBrace, "Expected '}' at the start of then clause");
+        Statement elseBranch = null;
+        if (match(TokenType.Else)) {
+            consume(TokenType.LBrace, "Expected '{' at the start of else clause");
+            elseBranch = statement();
+            consume(TokenType.RBrace, "Expected '}' at the start of else clause");
+        }
+
+        return new Statement.IfStatement(expr, thenBranch, elseBranch);
+    }
+
     private Statement expressionStatement() throws ParseError {
         Expression expr = expression();
         consume(TokenType.Semicolon, "Expected ';' after expression");
@@ -107,10 +127,10 @@ public class Parser {
     }
 
     private Expression assignment() throws ParseError {
-        Expression expr = equality();
+        Expression expr = logic_or();
 
         if (match(TokenType.Equal)) {
-            TokenUtils.Token equals = previous();
+            Token equals = previous();
 
             //Recursively parse the right side of the expression
             Expression val = assignment();
@@ -126,11 +146,35 @@ public class Parser {
         return expr;
     }
 
+    private Expression logic_or() {
+        Expression expr = logic_and();
+
+        while (match(TokenType.Or)) {
+            Token op = previous();
+            Expression right = logic_and(); //Traverse the parser
+            expr = new Expression.LogicalExpression(expr, op, right);
+        }
+
+        return expr;
+    }
+
+    private Expression logic_and() {
+        Expression expr = equality();
+
+        while (match(TokenType.And)) {
+            Token op = previous();
+            Expression right = equality(); //Traverse the parser
+            expr = new Expression.LogicalExpression(expr, op, right);
+        }
+
+        return expr;
+    }
+
     private Expression equality() throws ParseError {
         Expression expr = comparison();
 
         while (match(TokenType.Not_Equal, TokenType.Equal_Equal)) {
-            TokenUtils.Token op = previous();
+            Token op = previous();
             Expression right = comparison();
             expr = new Expression.BinaryExpression(expr, op, right);
         }
@@ -142,7 +186,7 @@ public class Parser {
         Expression expr = term();
 
         while (match(TokenType.Greater, TokenType.Greater_Equal, TokenType.Less, TokenType.Less_Equal)) {
-            TokenUtils.Token op = previous();
+            Token op = previous();
             Expression right = term();
             expr = new Expression.BinaryExpression(expr, op, right);
         }
@@ -154,7 +198,7 @@ public class Parser {
         Expression expr = factor();
 
         while (match(TokenType.Minus, TokenType.Plus)) {
-            TokenUtils.Token op = previous();
+            Token op = previous();
 
             Expression right = factor();
             expr = new Expression.BinaryExpression(expr, op, right);
@@ -167,7 +211,7 @@ public class Parser {
         Expression expr = unary();
 
         while (match(TokenType.Slash, TokenType.Star)) {
-            TokenUtils.Token op = previous();
+            Token op = previous();
             Expression right = unary();
             expr = new Expression.BinaryExpression(expr, op, right);
         }
@@ -177,7 +221,7 @@ public class Parser {
 
     private Expression unary() throws ParseError {
         if (match(TokenType.Bang, TokenType.Minus)) {
-            TokenUtils.Token op = previous();
+            Token op = previous();
             Expression right = unary();
             return new Expression.UnaryExpression(op, right);
         }
@@ -229,13 +273,13 @@ public class Parser {
         }
     }
 
-    private TokenUtils.Token consume(TokenType type, String message) throws ParseError {
+    private Token consume(TokenType type, String message) throws ParseError {
         if (check(type)) return advance();
 
         throw error(peek(), message);
     }
 
-    private ParseError error(TokenUtils.Token token, String message) throws ParseError {
+    private ParseError error(Token token, String message) throws ParseError {
         if (token.getTokenType() == TokenType.EOF) {
             throw new ParseError(" at end " + message);
         } else {
@@ -265,16 +309,16 @@ public class Parser {
         return peek().getTokenType() == TokenType.EOF;
     }
 
-    private TokenUtils.Token advance() {
+    private Token advance() {
         if (!isAtEnd()) current += 1;
         return previous();
     }
 
-    private TokenUtils.Token peek() {
+    private Token peek() {
         return tokens.get(current);
     }
 
-    private TokenUtils.Token previous() {
+    private Token previous() {
         return tokens.get(current - 1);
     }
 
