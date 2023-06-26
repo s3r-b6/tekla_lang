@@ -8,15 +8,16 @@ public class AstPrinter implements ExpressionVisitor<String> {
         return expr.accept(this);
     }
 
+
     @Override
     public String visitAssignExpression(Expression.AssignExpression assignExpr) {
-        return parenthesize(TokenUtils.TokenType.Equal.toString(),
+        return parenthesize("Equal",
                 new Expression.LiteralExpression(assignExpr.name.getValue()), assignExpr.value);
     }
 
     @Override
     public String visitVarExpression(Expression.VarExpression varExpr) {
-        return parenthesize("var " + varExpr.name.getValue());
+        return parenthesize("Var " + varExpr.name.getValue());
     }
 
     @Override
@@ -42,7 +43,7 @@ public class AstPrinter implements ExpressionVisitor<String> {
 
     @Override
     public String visitLogicalExpression(Expression.LogicalExpression logicExp) {
-        return parenthesize(logicExp.operator.toString(), logicExp.left, logicExp.right);
+        return parenthesize(logicExp.operator.getTokenType().toString(), logicExp.left, logicExp.right);
     }
 
     private String parenthesize(String name, Expression... exprs) {

@@ -67,6 +67,7 @@ public class Lexer {
 
             case '<' -> {
                 if (nextMatches('=')) {
+                    consumeChar();
                     return new SimpleToken(this.line, Less_Equal);
                 } else {
                     return new SimpleToken(this.line, Less);
@@ -74,6 +75,7 @@ public class Lexer {
             }
             case '>' -> {
                 if (nextMatches('=')) {
+                    consumeChar();
                     return new SimpleToken(this.line, Greater_Equal);
                 } else {
                     return new SimpleToken(this.line, Greater);
@@ -81,6 +83,7 @@ public class Lexer {
             }
             case '!' -> {
                 if (nextMatches('=')) {
+                    consumeChar();
                     return new SimpleToken(this.line, Not_Equal);
                 } else {
                     return new SimpleToken(this.line, Bang);
@@ -88,14 +91,15 @@ public class Lexer {
             }
             case '=' -> {
                 if (nextMatches('=')) {
+                    consumeChar();
                     return new SimpleToken(this.line, Equal_Equal);
                 } else {
-
                     return new SimpleToken(this.line, Equal);
                 }
             }
             case '+' -> {
                 if (nextMatches('=')) {
+                    consumeChar();
                     return new SimpleToken(this.line, Plus_Equal);
                 } else {
                     return new SimpleToken(this.line, Plus);
@@ -103,6 +107,7 @@ public class Lexer {
             }
             case '*' -> {
                 if (nextMatches('=')) {
+                    consumeChar();
                     return new SimpleToken(this.line, Star_Equal);
                 } else {
                     return new SimpleToken(this.line, Star);
@@ -110,6 +115,7 @@ public class Lexer {
             }
             case '-' -> {
                 if (nextMatches('=')) {
+                    consumeChar();
                     return new SimpleToken(this.line, Minus_Equal);
                 } else {
                     return new SimpleToken(this.line, Minus);
@@ -222,6 +228,7 @@ public class Lexer {
         while (this.currChar != ' ' && this.currChar != '/' && this.currChar != '*'
                 && this.currChar != '-' && this.currChar != '+' && this.currChar != ';'
                 && this.currChar != ')' && this.currChar != '|' && this.currChar != '&'
+                && this.currChar != '='
                 && this.position <= this.source.length()) {
 
             if (!isDigit(this.currChar)) isValid = false;

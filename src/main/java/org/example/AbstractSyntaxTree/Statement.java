@@ -1,12 +1,13 @@
 package org.example.AbstractSyntaxTree;
 
+import org.example.Lexer.TokenUtils;
 import org.example.Lexer.ValueToken;
 
 import java.util.List;
 
 public abstract class Statement {
 
-    public abstract Void accept(StatementVisitor visitor);
+    public abstract Void accept(StatementVisitor visitor) throws Interpreter.ControlFlow;
 
     public abstract String toString();
 
@@ -82,7 +83,7 @@ public abstract class Statement {
         }
 
         @Override
-        public Void accept(StatementVisitor visitor) {
+        public Void accept(StatementVisitor visitor) throws Interpreter.ControlFlow {
             return visitor.visitBlockStatement(this);
         }
 
@@ -102,12 +103,6 @@ public abstract class Statement {
         Statement thenBranch;
         Statement elseBranch;
 
-        IfStatement(Expression condit, Statement thenBranch) {
-            this.condit = condit;
-            this.thenBranch = thenBranch;
-            this.elseBranch = null;
-        }
-
         IfStatement(Expression condit, Statement thenBranch, Statement elseBranch) {
             this.condit = condit;
             this.thenBranch = thenBranch;
@@ -116,7 +111,7 @@ public abstract class Statement {
 
 
         @Override
-        public Void accept(StatementVisitor visitor) {
+        public Void accept(StatementVisitor visitor) throws Interpreter.ControlFlow {
             return visitor.visitIfStatement(this);
         }
 
@@ -125,11 +120,12 @@ public abstract class Statement {
             StringBuilder blockString = new StringBuilder();
             blockString.append("If statement: ");
 
-            blockString.append("\n").append(this.condit);
-            blockString.append("\n").append(this.thenBranch);
+            AstPrinter print = new AstPrinter();
+            blockString.append("\n").append(print.print(this.condit));
+            blockString.append("\n").append(this.thenBranch.toString());
 
             if (elseBranch != null) {
-                blockString.append("\n").append(this.elseBranch);
+                blockString.append("\n").append(this.elseBranch.toString());
             }
 
             return blockString.toString();
@@ -155,6 +151,44 @@ public abstract class Statement {
         public String toString() {
             AstPrinter printer = new AstPrinter();
             return String.format("While statement: condition: %s body: %s", printer.print(condition), body.toString());
+        }
+    }
+
+    static class ContinueStatement extends Statement {
+        TokenUtils.Token continueStatement;
+
+        ContinueStatement(TokenUtils.Token tok) {
+            this.continueStatement = tok;
+        }
+
+        @Override
+        public Void accept(StatementVisitor visitor) throws Interpreter.ControlFlow {
+            visitor.visitContinueStatement(this);
+            return null;
+        }
+
+        @Override
+        public String toString() {
+            return "Continue statement";
+        }
+    }
+
+    static class BreakStatement extends Statement {
+        TokenUtils.Token breakTok;
+
+        BreakStatement(TokenUtils.Token tok) {
+            this.breakTok = tok;
+        }
+
+        @Override
+        public Void accept(StatementVisitor visitor) throws Interpreter.ControlFlow {
+            visitor.visitBreakStatement(this);
+            return null;
+        }
+
+        @Override
+        public String toString() {
+            return "Break statement";
         }
     }
 }

@@ -1,6 +1,5 @@
 package org.example.AbstractSyntaxTree;
 
-import org.example.Lexer.TokenUtils;
 import org.example.Lexer.TokenUtils.Token;
 import org.example.Lexer.TokenUtils.TokenType;
 import org.example.Lexer.ValueToken;
@@ -14,6 +13,7 @@ import java.util.List;
  * This is a recursive descent parser
  */
 public class Parser {
+    List<Statement> statements = new ArrayList<>();
     private final List<Token> tokens;
     private final List<ParseError> errors;
     private int current = 0;
@@ -25,7 +25,6 @@ public class Parser {
     }
 
     public List<Statement> parse() {
-        List<Statement> statements = new ArrayList<>();
 
         while (!isAtEnd()) statements.add(declaration());
 
@@ -34,7 +33,6 @@ public class Parser {
 
     private Statement declaration() {
         try {
-            if (match(TokenType.Let)) return letStatement();
             return statement();
         } catch (ParseError err) {
             errors.add(err);
@@ -45,10 +43,13 @@ public class Parser {
     }
 
     private Statement statement() throws ParseError {
-        if (match(TokenType.For)) return forStatement();
+        if (match(TokenType.Let)) return letStatement();
         if (match(TokenType.Print)) return printStatement();
+        if (match(TokenType.For)) return forStatement();
         if (match(TokenType.While)) return whileStatement();
-        if (match(TokenType.LBrace)) return new Statement.BlockStatement(blockStatement());
+        if (match(TokenType.LBrace)) return blockStatement();
+        if (match(TokenType.Break)) return breakStatement();
+        if (match(TokenType.Continue)) return continueStatement();
         if (match(TokenType.If)) return ifStatement();
         return expressionStatement();
     }
@@ -65,6 +66,7 @@ public class Parser {
             initializer = expressionStatement();
         }
 
+
         Expression condition = null;
         if (!check(TokenType.Semicolon)) {
             condition = expression();
@@ -76,6 +78,7 @@ public class Parser {
         if (!check(TokenType.RParen)) {
             increment = expression();
         }
+
         consume(TokenType.RParen, "Expected ')' to end for loop clauses.");
 
         Statement body = statement();
@@ -94,8 +97,7 @@ public class Parser {
 
         body = new Statement.WhileStatement(condition, body);
 
-        if (initializer != null) body = new Statement.BlockStatement(Arrays.asList(initializer, body));
-
+        if (initializer != null) statements.add(initializer);
         return body;
     }
 
@@ -106,6 +108,18 @@ public class Parser {
         Statement body = statement();
 
         return new Statement.WhileStatement(condition, body);
+    }
+
+    private Statement breakStatement() {
+        consume(TokenType.Semicolon, "Expected ';' after a break statement.");
+
+        return new Statement.BreakStatement(this.tokens.get(current));
+    }
+
+    private Statement continueStatement() {
+        consume(TokenType.Semicolon, "Expected ';' after a continue statement.");
+
+        return new Statement.ContinueStatement(this.tokens.get(current));
     }
 
     private Statement letStatement() throws ParseError {
@@ -128,7 +142,7 @@ public class Parser {
         return new Statement.PrintStatement(expr);
     }
 
-    private ArrayList<Statement> blockStatement() throws ParseError {
+    private Statement.BlockStatement blockStatement() throws ParseError {
         ArrayList<Statement> statements = new ArrayList<>();
 
         while (!check(TokenType.RBrace) && !isAtEnd()) {
@@ -136,7 +150,7 @@ public class Parser {
         }
 
         consume(TokenType.RBrace, "Expected '}' at the end of the block");
-        return statements;
+        return new Statement.BlockStatement(statements);
     }
 
     private Statement ifStatement() {
@@ -145,13 +159,11 @@ public class Parser {
         consume(TokenType.RParen, "Expected ')' at the end of 'if' statement");
 
         consume(TokenType.LBrace, "Expected '{' at the start of then clause");
-        Statement thenBranch = statement();
-        consume(TokenType.RBrace, "Expected '}' at the start of then clause");
+        Statement thenBranch = blockStatement();
         Statement elseBranch = null;
         if (match(TokenType.Else)) {
             consume(TokenType.LBrace, "Expected '{' at the start of else clause");
-            elseBranch = statement();
-            consume(TokenType.RBrace, "Expected '}' at the start of else clause");
+            elseBranch = blockStatement();
         }
 
         return new Statement.IfStatement(expr, thenBranch, elseBranch);
@@ -305,7 +317,7 @@ public class Parser {
             if (previous().getTokenType() == TokenType.Semicolon) return;
 
             switch (peek().getTokenType()) {
-                case Function, Let, For, If, While, Return, Print -> {
+                case Function, Let, For, If, While, Return, Print, Break, Continue -> {
                     return;
                 }
             }

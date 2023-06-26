@@ -49,6 +49,8 @@ public class TokenUtils {
         keywords.put("true", TokenType.True);
         keywords.put("false", TokenType.False);
         keywords.put("print", TokenType.Print);
+        keywords.put("break", TokenType.Break);
+        keywords.put("continue", TokenType.Continue);
         keywords.put("nil", TokenType.Nil);
         return keywords;
     }
@@ -63,6 +65,8 @@ public class TokenUtils {
         For, If, Else,
         While, Return,
         Bang,
+
+        Break, Continue,
 
         And, Or, BitwiseAnd, BitwiseOr,
 

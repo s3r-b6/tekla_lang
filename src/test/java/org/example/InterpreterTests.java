@@ -12,7 +12,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ParserTests {
+public class InterpreterTests {
 
     public static void printTestInfo(String desc, String src) {
         String BLUE = "\033[1;94m";
@@ -231,6 +231,124 @@ public class ParserTests {
             interpreter.interpret(statements);
 
             assertEquals(exp[i], outContent.toString());
+        }
+    }
+
+    @Test
+    public void testForLoop() {
+        String src = "let a = 0; let temp; for (let b = 1; a < 10000; b = temp + b) {print(a);temp = a;a = b;}";
+        String exp = """
+                0
+                1
+                1
+                2
+                3
+                5
+                8
+                13
+                21
+                34
+                55
+                89
+                144
+                233
+                377
+                610
+                987
+                1597
+                2584
+                4181
+                6765
+                """;
+
+        Lexer lex = new Lexer(src);
+
+        List<TokenUtils.Token> tokens = lex.readUntilEOF();
+        Parser parser = new Parser(tokens);
+
+        List<Statement> statements = parser.parse();
+        Interpreter interpreter = new Interpreter();
+        ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outContent));
+
+        interpreter.interpret(statements);
+
+        assertEquals(exp, outContent.toString());
+    }
+
+    @Test
+    public void testControlFlow() {
+        String[] src = {
+                """
+                let a = 2;
+                while (true) {
+                    print(a);
+                    break;
+                }
+                """,
+                """
+                let a = 1;
+                while (true) {
+                    if (a == 4){
+                        break;
+                    }
+                a = a + 1;
+                print(a);
+                }
+                """,
+                """
+                let a = 1;
+                while (a<4) {
+                    a = a + 1;
+                    print(a);
+                }
+                """,
+                """
+                for (let i =0; i<=10; i=i+1){ if (i==2 || i==3) { i=i+1; continue; } if (i == 9) { break; } print(i); }
+                """
+        };
+        String[] exp = {
+                """
+                2
+                """,
+                """
+                2
+                3
+                4
+                """,
+                """
+                2
+                3
+                4
+                """,
+                """
+                0
+                1
+                4
+                5
+                6
+                7
+                8
+                """
+        };
+
+        for (int i = 0; i < src.length; i++) {
+            Lexer lex = new Lexer(src[i]);
+
+            List<TokenUtils.Token> tokens = lex.readUntilEOF();
+            Parser parser = new Parser(tokens);
+            Interpreter interpreter = new Interpreter();
+            List<Statement> statements = parser.parse();
+            if (parser.hadErrors()) parser.printErrors();
+            else {
+                ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+                System.setOut(new PrintStream(outContent));
+
+                interpreter.interpret(statements);
+                if (interpreter.hadError()) interpreter.printErrors();
+
+                assertEquals(exp[i], outContent.toString());
+            }
         }
     }
 }

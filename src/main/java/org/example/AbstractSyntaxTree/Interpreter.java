@@ -20,8 +20,12 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor 
         }
         try {
             for (Statement st : statements) {
-                //DEBUG: System.out.println(st.toString());
-                execute(st);
+                try {
+                    execute(st);
+                } catch (ControlFlow cf) {
+                    this.hadError = true;
+                    throw new RuntimeError(cf.getToken(), cf.getToken().toString() + " outside of a loop.");
+                }
             }
         } catch (RuntimeError err) {
             this.hadError = true;
@@ -63,13 +67,13 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor 
     }
 
     @Override
-    public Void visitBlockStatement(Statement.BlockStatement blockStatement) {
+    public Void visitBlockStatement(Statement.BlockStatement blockStatement) throws ControlFlow {
         executeBlock(blockStatement.statementList, new Environment(env));
         return null;
     }
 
     @Override
-    public Void visitIfStatement(Statement.IfStatement ifStatement) {
+    public Void visitIfStatement(Statement.IfStatement ifStatement) throws ControlFlow {
         if (isTruthy(evaluate(ifStatement.condit))) {
             execute(ifStatement.thenBranch);
         } else if (ifStatement.elseBranch != null) {
@@ -82,12 +86,31 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor 
     @Override
     public Void visitWhileStatement(Statement.WhileStatement whileStatement) {
         while (isTruthy(evaluate(whileStatement.condition))) {
-            execute(whileStatement.body);
+            try {
+                execute(whileStatement.body);
+            } catch (ControlFlow cf) {
+                if (cf instanceof ControlFlow.Break) {
+                    break;
+                } else if (cf instanceof ControlFlow.Continue) {
+                } else {
+                    System.err.println("Unhandled control flow exception: " + cf);
+                }
+            }
         }
         return null;
     }
 
-    private void executeBlock(List<Statement> statementList, Environment environment) {
+    @Override
+    public Void visitBreakStatement(Statement.BreakStatement breakStatement) throws ControlFlow {
+        throw new ControlFlow.Break(breakStatement.breakTok);
+    }
+
+    @Override
+    public Void visitContinueStatement(Statement.ContinueStatement continueStatement) throws ControlFlow {
+        throw new ControlFlow.Continue(continueStatement.continueStatement);
+    }
+
+    private void executeBlock(List<Statement> statementList, Environment environment) throws ControlFlow {
         Environment prevEnv = this.env;
 
         try {
@@ -178,7 +201,7 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor 
                 return !isEqual(left, right);
             }
 
-            case Equal -> {
+            case Equal_Equal -> {
                 checkNumberOperands(binExpr.operator, left, right);
                 return isEqual(left, right);
             }
@@ -255,7 +278,7 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor 
         return object.toString();
     }
 
-    private void execute(Statement st) {
+    private void execute(Statement st) throws ControlFlow {
         st.accept(this);
     }
 
@@ -282,4 +305,33 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor 
             System.out.printf("  [%sINTERPRETER ERROR%s]: %s on line %d%n", RED, NO_COLOR, super.getMessage(), this.token.getPos());
         }
     }
+
+    public static class ControlFlow extends Throwable {
+        TokenUtils.Token tok;
+
+        ControlFlow(TokenUtils.Token tok) {
+            this.tok = tok;
+        }
+
+        public TokenUtils.Token getToken() {
+            return this.tok;
+        }
+
+        public static class Break extends ControlFlow {
+            TokenUtils.Token breakTok;
+
+            Break(TokenUtils.Token breakTok) {
+                super(breakTok);
+            }
+        }
+
+        public static class Continue extends ControlFlow {
+            TokenUtils.Token cont;
+
+            Continue(TokenUtils.Token cont) {
+                super(cont);
+            }
+        }
+    }
+
 }
