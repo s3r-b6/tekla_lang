@@ -81,7 +81,9 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor 
 
     @Override
     public Void visitWhileStatement(Statement.WhileStatement whileStatement) {
-        //TODO:
+        while (isTruthy(evaluate(whileStatement.condition))) {
+            execute(whileStatement.body);
+        }
         return null;
     }
 
@@ -90,7 +92,6 @@ public class Interpreter implements ExpressionVisitor<Object>, StatementVisitor 
 
         try {
             this.env = environment;
-
             for (Statement st : statementList) execute(st);
         } finally {
             this.env = prevEnv;

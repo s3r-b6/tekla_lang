@@ -6,6 +6,7 @@ import org.example.Lexer.TokenUtils.TokenType;
 import org.example.Lexer.ValueToken;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -44,10 +45,67 @@ public class Parser {
     }
 
     private Statement statement() throws ParseError {
+        if (match(TokenType.For)) return forStatement();
         if (match(TokenType.Print)) return printStatement();
+        if (match(TokenType.While)) return whileStatement();
         if (match(TokenType.LBrace)) return new Statement.BlockStatement(blockStatement());
         if (match(TokenType.If)) return ifStatement();
         return expressionStatement();
+    }
+
+    private Statement forStatement() {
+        consume(TokenType.LParen, "Expected '(' after 'for'.");
+
+        Statement initializer;
+        if (match(TokenType.Semicolon)) {
+            initializer = null;
+        } else if (match(TokenType.Let)) {
+            initializer = letStatement();
+        } else {
+            initializer = expressionStatement();
+        }
+
+        Expression condition = null;
+        if (!check(TokenType.Semicolon)) {
+            condition = expression();
+        }
+
+        consume(TokenType.Semicolon, "Expected ';' after condition in for loop.");
+
+        Expression increment = null;
+        if (!check(TokenType.RParen)) {
+            increment = expression();
+        }
+        consume(TokenType.RParen, "Expected ')' to end for loop clauses.");
+
+        Statement body = statement();
+
+
+        //Turn it into a while statement
+        if (increment != null) {
+            body = new Statement.BlockStatement(
+                    Arrays.asList(
+                            body,
+                            new Statement.ExpressionStatement(increment)
+                    ));
+        }
+
+        if (condition == null) condition = new Expression.LiteralExpression(true);
+
+        body = new Statement.WhileStatement(condition, body);
+
+        if (initializer != null) body = new Statement.BlockStatement(Arrays.asList(initializer, body));
+
+        return body;
+    }
+
+    private Statement whileStatement() {
+        consume(TokenType.LParen, "Expected '(' after a while statement.");
+        Expression condition = expression();
+        consume(TokenType.RParen, "Expected ')' after the condition of while");
+        Statement body = statement();
+
+        return new Statement.WhileStatement(condition, body);
     }
 
     private Statement letStatement() throws ParseError {

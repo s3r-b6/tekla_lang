@@ -12,4 +12,5 @@ public interface StatementVisitor {
     Void visitIfStatement(Statement.IfStatement ifStatement);
 
     Void visitWhileStatement(Statement.WhileStatement whileStatement);
+
 }

@@ -2,8 +2,6 @@ package org.example.AbstractSyntaxTree;
 
 import org.example.Lexer.ValueToken;
 
-import java.sql.Array;
-import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Statement {
@@ -30,7 +28,10 @@ public abstract class Statement {
         @Override
         public String toString() {
             AstPrinter printer = new AstPrinter();
-            return String.format("Let statement: name: %s, initializer: %s", name.getValue(), printer.print(initializer));
+            if (this.initializer != null) {
+                return String.format("Let statement: name: %s, initializer: %s", name.getValue(), printer.print(initializer));
+            }
+            return String.format("Let statement: name: %s, initializer: null", name.getValue());
         }
     }
 
@@ -136,11 +137,11 @@ public abstract class Statement {
     }
 
     static class WhileStatement extends Statement {
-        Expression expr;
+        Expression condition;
         Statement body;
 
         WhileStatement(Expression expr, Statement body) {
-            this.expr = expr;
+            this.condition = expr;
             this.body = body;
         }
 
@@ -153,7 +154,7 @@ public abstract class Statement {
         @Override
         public String toString() {
             AstPrinter printer = new AstPrinter();
-            return String.format("While statement: condition: %s body: %s", printer.print(expr), body.toString());
+            return String.format("While statement: condition: %s body: %s", printer.print(condition), body.toString());
         }
     }
 }

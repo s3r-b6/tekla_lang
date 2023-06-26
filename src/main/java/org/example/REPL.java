@@ -36,6 +36,7 @@ public class REPL {
         }
     }
 
+    //    let a = 0; let temp; for (let b = 1; a < 10000; b = temp + b) {print(a);temp = a;a = b;}
     private static void run(List<Token> tokens) {
         Parser parser = new Parser(tokens);
         List<Statement> statements = parser.parse();
@@ -44,7 +45,7 @@ public class REPL {
             parser.printErrors();
         } else {
             if (statements.size() > 0) {
-                //interpreter.print(statements);
+                interpreter.print(statements);
                 interpreter.interpret(statements);
                 if (interpreter.hadError()) interpreter.printErrors();
             }

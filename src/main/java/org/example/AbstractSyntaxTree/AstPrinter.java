@@ -1,5 +1,7 @@
 package org.example.AbstractSyntaxTree;
 
+import org.example.Lexer.TokenUtils;
+
 public class AstPrinter implements ExpressionVisitor<String> {
 
     public String print(Expression expr) {
@@ -8,14 +10,13 @@ public class AstPrinter implements ExpressionVisitor<String> {
 
     @Override
     public String visitAssignExpression(Expression.AssignExpression assignExpr) {
-        //TODO:
-        return null;
+        return parenthesize(TokenUtils.TokenType.Equal.toString(),
+                new Expression.LiteralExpression(assignExpr.name.getValue()), assignExpr.value);
     }
 
     @Override
     public String visitVarExpression(Expression.VarExpression varExpr) {
-        //TODO:
-        return null;
+        return parenthesize("var " + varExpr.name.getValue());
     }
 
     @Override
@@ -41,7 +42,7 @@ public class AstPrinter implements ExpressionVisitor<String> {
 
     @Override
     public String visitLogicalExpression(Expression.LogicalExpression logicExp) {
-        return null;
+        return parenthesize(logicExp.operator.toString(), logicExp.left, logicExp.right);
     }
 
     private String parenthesize(String name, Expression... exprs) {

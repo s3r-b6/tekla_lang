@@ -44,6 +44,16 @@ public class Environment {
             return;
         }
 
+        Environment currEnv = this.enclosing;
+        while (currEnv != null) {
+            if (currEnv.values.containsKey(name.getValue())) {
+                currEnv.values.put(name.getValue(), value);
+                return;
+            }
+
+            currEnv = currEnv.enclosing;
+        }
+
         throw new RuntimeException("Tried to assign to an undefined variable '" + name.getValue() + "'.");
     }
 }
